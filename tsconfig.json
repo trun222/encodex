@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "allowJs": true,
+    "target": "es6",
+    "module": "commonjs",
+    "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
+    "sourceMap": true,
+    "outDir": ".dist",
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "typeRoots": ["node_modules/@types"],
+    "skipLibCheck": true
+  },
+  "plugins": [
+    {
+      "transform": "@zerollup/ts-transform-paths"
+    }
+  ],
+  "exclude": ["node_modules", "td", ".dist"],
+  "include": ["**/*.ts", "types.d.ts"]
+}

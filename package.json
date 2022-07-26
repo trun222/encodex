@@ -1,0 +1,49 @@
+{
+  "name": "encodex",
+  "version": "0.1.0",
+  "description": "",
+  "engines": {
+    "node": "16.x",
+    "npm": ">=8.1.2"
+  },
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:*\"",
+    "dev:watch": "ts-node-dev --no-notify --respawn --transpile-only -r tsconfig-paths/register ./src",
+    "build:tsc": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./.dist",
+    "format": "prettier --write '**/*.{ts,tsx,yml,yaml}'",
+    "lint": "eslint . --ext .ts --max-warnings=0 --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@zerollup/ts-transform-paths": "^1.7.18",
+    "fastify": "^4.3.0",
+    "http": "^0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "query-string": "^7.1.0",
+    "slugify": "^1.6.3",
+    "ts-pattern": "^3.3.5",
+    "tscpaths": "0.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.8",
+    "@typescript-eslint/parser": "^5.21.0",
+    "@typescript-eslint/typescript-estree": "^4.33.0",
+    "concurrently": "^7.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-next": "11.1.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^2.7.1",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.4.0",
+    "ts-node-dev": "^1.1.8",
+    "tsc-watch": "^4.5.0",
+    "tsconfig-paths": "^3.12.0",
+    "typescript": "^4.5.2"
+  }
+}
