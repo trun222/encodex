@@ -5,6 +5,10 @@ node_modules
 .pnp
 .pnp.js
 
+# media
+media
+output
+
 # testing
 coverage
 

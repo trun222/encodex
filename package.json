@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "concurrently \"npm:dev:*\"",
     "dev:watch": "ts-node-dev --no-notify --respawn --transpile-only -r tsconfig-paths/register ./src",
-    "build:tsc": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./.dist",
+    "build": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./.dist",
     "format": "prettier --write '**/*.{ts,tsx,yml,yaml}'",
     "lint": "eslint . --ext .ts --max-warnings=0 --fix"
   },
@@ -23,6 +23,7 @@
     "http": "^0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "query-string": "^7.1.0",
+    "shelljs": "^0.8.5",
     "slugify": "^1.6.3",
     "ts-pattern": "^3.3.5",
     "tscpaths": "0.0.9"
