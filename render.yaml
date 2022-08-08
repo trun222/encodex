@@ -8,4 +8,4 @@ services:
     buildCommand: npm i && npm run build
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    plan: free
+    plan: starter

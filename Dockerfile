@@ -13,6 +13,9 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
 RUN apt-get install -y nodejs
 RUN node --version
 
+# install imageMagick
+RUN apt-get install -y imagemagick
+
 # Ensure you are in the proper directory
 RUN npm ci \
   && npm run build

@@ -42,18 +42,13 @@ server.post('/quality', async (request, reply) => {
     quality,
   });
   return { file: await loadFile(outputFileName, 'output') };
-})
+});
 
-const start = async () => {
-  try {
-    await server.listen({ port: 7777 })
-
-    const address = server.server.address()
-    const port = typeof address === 'string' ? address : address?.port
-    console.log(`Encodex ready to conver your media need on port ${port}!`)
-  } catch (err) {
-    server.log.error(err)
-    process.exit(1)
-  }
-}
-start()
+(async () => {
+  const PORT = 7777;
+  server.listen({ port: PORT, host: '0.0.0.0' }, () => {
+    console.log(
+      `🚀 Encodex ready to convert your media needs on port ${PORT}!`
+    );
+  })
+})();
