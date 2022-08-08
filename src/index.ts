@@ -1,6 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify'
 import { Resize, Reduce, Quality } from './util/commands';
-import { loadFile, writeFile } from './util/files';
+import { loadFile, writeFile, createFolders } from './util/files';
 import fileUpload from 'fastify-file-upload';
 
 const server: FastifyInstance = Fastify({})
@@ -46,6 +46,8 @@ server.post('/quality', async (request, reply) => {
 
 (async () => {
   const PORT = 7777;
+  // Create initial folder structure.
+  await createFolders();
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
     console.log(
       `🚀 Encodex ready to convert your media needs on port ${PORT}!`
