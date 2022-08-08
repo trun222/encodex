@@ -3,7 +3,7 @@ services:
     name: encodex
     repo: https://github.com/trun222/encodex
     env: docker
-    branch: dev
+    branch: main
     autoDeploy: true
     buildCommand: npm i && npm run build
     dockerfilePath: ./Dockerfile
