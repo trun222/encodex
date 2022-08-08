@@ -20,6 +20,7 @@
   "dependencies": {
     "@zerollup/ts-transform-paths": "^1.7.18",
     "fastify": "^4.3.0",
+    "fastify-file-upload": "^4.0.0",
     "http": "^0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "query-string": "^7.1.0",
