@@ -17,4 +17,4 @@ RUN node --version
 RUN npm ci \
   && npm run build
 
-CMD ["doppler", "run", "--", "node", ".dist/index.js"]
+CMD ["node", ".dist/index.js"]
