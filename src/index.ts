@@ -45,10 +45,10 @@ server.post('/quality', async (request, reply) => {
 });
 
 server.post('/quality2', async (request, reply) => {
-  const { quality, outputFileName }: any = request.body;
+  const { quality, inputFileName, outputFileName }: any = request.body;
   // Perform the conversion and upload it to S3 or Wasabi
   Quality2({
-    inputFileName: 'https://resume-thomas-underwood.s3.amazonaws.com/profile.jpg',
+    inputFileName,
     outputFileName,
     quality,
   });
