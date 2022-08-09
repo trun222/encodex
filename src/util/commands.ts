@@ -16,11 +16,12 @@ export const OUTPUT_PATH = './output'
 /*
   TODO: 
   Logging - ✅
-  Doppler
-  Rate Limiting
-  Determine Membership
+  Doppler - ✅
   Authentication
   Authorization 
+  Planet Scale - 
+  Rate Limiting
+  Determine Membership
   Error Handling 
   Valdiation
 */

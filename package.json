@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "concurrently \"npm:dev:*\"",
     "dev:watch": "doppler run -- ts-node-dev --no-notify --respawn --transpile-only -r tsconfig-paths/register ./src",
-    "build": "doppler run -- tsc && tscpaths -p ./tsconfig.json -s ./src -o ./.dist",
+    "build": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./.dist",
     "format": "prettier --write '**/*.{ts,tsx,yml,yaml}'",
     "lint": "eslint . --ext .ts --max-warnings=0 --fix"
   },
