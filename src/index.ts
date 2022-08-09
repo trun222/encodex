@@ -5,7 +5,7 @@ import fileUpload from 'fastify-file-upload';
 import { logger } from '@/src/util/logging';
 
 const server: FastifyInstance = Fastify({})
-const env = 'local';
+const env = process?.env?.ENV;
 
 // Set Max Limits
 server.register(fileUpload, {
