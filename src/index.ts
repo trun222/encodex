@@ -10,6 +10,12 @@ server.register(fileUpload, {
   limits: { fileSize: 3 * 1024 * 1024 },
 })
 
+// server.addHook('onRequest', (request, reply, done) => {
+//   console.log({ request });
+//   console.log(request?.raw.rawHeaders)
+//   done();
+// })
+
 server.post('/resize', async (request, reply) => {
   // For URL
   const { dimensions, outputFileName, url }: any = request?.body;

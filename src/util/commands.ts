@@ -36,9 +36,9 @@ export const Thumbnail = ({ dimensions, inputFileName, outputFileName, url }: { 
 
 export const Reduce = ({ percentage, inputFileName, outputFileName, url }: { percentage: number, inputFileName: string, outputFileName: string, url?: string }) => {
   if (url) {
-    return shell.exec(`magick ${url} -resize ${percentage} ${OUTPUT_PATH}/${outputFileName}`);
+    return shell.exec(`convert ${url} -resize ${percentage} ${OUTPUT_PATH}/${outputFileName}`);
   } else {
-    return shell.exec(`magick ${MEDIA_PATH}/${inputFileName} -resize ${percentage} ${OUTPUT_PATH}/${outputFileName}`);
+    return shell.exec(`convert ${MEDIA_PATH}/${inputFileName} -resize ${percentage} ${OUTPUT_PATH}/${outputFileName}`);
   }
 };
 
