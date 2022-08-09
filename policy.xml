@@ -1,3 +1,4 @@
+<!-- https://imagemagick.org/script/security-policy.php -->
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE policymap [
   <!ELEMENT policymap (policy)+>

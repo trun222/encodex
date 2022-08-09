@@ -1,61 +1,126 @@
 import Fastify, { FastifyInstance } from 'fastify'
-import { Resize, Reduce, Quality, Quality2 } from './util/commands';
+import { Resize, Reduce, Quality, Thumbnail, Format } from './util/commands';
 import { loadFile, writeFile, createFolders } from './util/files';
 import fileUpload from 'fastify-file-upload';
 
 const server: FastifyInstance = Fastify({})
 
+// Set Max Limits
 server.register(fileUpload, {
   limits: { fileSize: 3 * 1024 * 1024 },
 })
 
-// server.post('/resize', async (request, reply) => {
-//   const { dimensions, inputFileName, outputFileName }: any = request.body;
-//   Resize({
-//     dimensions,
-//     inputFileName,
-//     outputFileName
-//   })
-//   // Return a payload 
-//   return { file: await loadFile(`./output/${outputFileName}`) };
-// })
+server.post('/resize', async (request, reply) => {
+  // For URL
+  const { dimensions, outputFileName, url }: any = request?.body;
+  // For FILE
+  const name = (request?.body as any)?.file?.name;
+  const data = (request?.body as any)?.file?.data;
+  const fileDimensions = (request?.body as any)?.dimensions;
 
-// server.post('/reduce', async (request, reply) => {
-//   const { percentage, inputFileName, outputFileName }: any = request.body;
-//   // Perform the conversion and upload it to S3 or Wasabi
-//   Reduce({
-//     inputFileName,
-//     outputFileName,
-//     percentage,
-//   });
-//   return { file: await loadFile(`./output/${outputFileName}`) };
-// })
+  // For File
+  if (name && data) {
+    await writeFile(name, './media', data);
+  }
+
+  Resize({
+    dimensions: dimensions || fileDimensions,
+    inputFileName: name,
+    outputFileName,
+    url
+  })
+
+  return { file: await loadFile(outputFileName, 'output') };
+})
+
+server.post('/thumbnail', async (request, reply) => {
+  // For URL
+  const { dimensions, outputFileName, url }: any = request?.body;
+  // For FILE
+  const name = (request?.body as any)?.file?.name;
+  const data = (request?.body as any)?.file?.data;
+  const fileDimensions = (request?.body as any)?.dimensions;
+
+  // For File
+  if (name && data) {
+    await writeFile(name, './media', data);
+  }
+
+  Thumbnail({
+    dimensions: dimensions || fileDimensions,
+    inputFileName: name,
+    outputFileName,
+    url
+  })
+
+  return { file: await loadFile(outputFileName, 'output') };
+})
+
+server.post('/reduce', async (request, reply) => {
+  // For URL
+  const { percentage, url, outputFileName }: any = request.body;
+  // For FILE
+  const name = (request?.body as any)?.file?.name;
+  const data = (request?.body as any)?.file?.data;
+  const filePercentage = (request?.body as any)?.percentage;
+
+  // For File
+  if (name && data) {
+    await writeFile(name, './media', data);
+  }
+
+  Reduce({
+    inputFileName: name,
+    outputFileName,
+    percentage: percentage || filePercentage,
+    url
+  });
+
+  return { file: await loadFile(outputFileName, 'output') };
+})
 
 server.post('/quality', async (request, reply) => {
-  const { quality, outputFileName }: any = request.body;
-  const { name, data } = (request.body as any).file;
-  await writeFile(name, './media', data);
-  // Perform the conversion and upload it to S3 or Wasabi
+  // For URL
+  const { quality, outputFileName, url }: any = request?.body;
+  // For FILE
+  const name = (request?.body as any)?.file?.name;
+  const data = (request?.body as any)?.file?.data;
+
+  // For File
+  if (name && data) {
+    await writeFile(name, './media', data);
+  }
+
   Quality({
     inputFileName: name,
     outputFileName,
     quality,
+    url
   });
+
   return { file: await loadFile(outputFileName, 'output') };
 });
 
-server.post('/quality2', async (request, reply) => {
-  const { quality, inputFileName, outputFileName }: any = request.body;
-  // Perform the conversion and upload it to S3 or Wasabi
-  Quality2({
-    inputFileName,
-    outputFileName,
-    quality,
+server.post('/format', async (request, reply) => {
+  // For URL
+  const { format, outputFileName, url }: any = request?.body;
+  // For FILE
+  const name = (request?.body as any)?.file?.name;
+  const data = (request?.body as any)?.file?.data;
+
+  // For File
+  if (name && data) {
+    await writeFile(name, './media', data);
+  }
+
+  Format({
+    inputFileName: name,
+    outputFileName: format === '.png' ? outputFileName + '.png' : outputFileName + '.jpg',
+    url
   });
-  return { file: await loadFile(outputFileName, 'output') };
+
+  return { file: await loadFile(format === '.png' ? outputFileName + '.png' : outputFileName + '.jpg', 'output') };
 });
-
-
 
 (async () => {
   const PORT = 7777;
