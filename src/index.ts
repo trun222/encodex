@@ -1,5 +1,5 @@
 import Fastify, { FastifyInstance } from 'fastify'
-import { Resize, Reduce, Quality } from './util/commands';
+import { Resize, Reduce, Quality, Quality2 } from './util/commands';
 import { loadFile, writeFile, createFolders } from './util/files';
 import fileUpload from 'fastify-file-upload';
 
@@ -43,6 +43,19 @@ server.post('/quality', async (request, reply) => {
   });
   return { file: await loadFile(outputFileName, 'output') };
 });
+
+server.post('/quality2', async (request, reply) => {
+  const { quality, outputFileName }: any = request.body;
+  // Perform the conversion and upload it to S3 or Wasabi
+  Quality2({
+    inputFileName: 'https://resume-thomas-underwood.s3.amazonaws.com/profile.jpg',
+    outputFileName,
+    quality,
+  });
+  return { file: await loadFile(outputFileName, 'output') };
+});
+
+
 
 (async () => {
   const PORT = 7777;

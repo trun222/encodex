@@ -14,3 +14,7 @@ export const Reduce = ({ percentage, inputFileName, outputFileName }: { percenta
 export const Quality = ({ quality, inputFileName, outputFileName }: { quality: number, inputFileName: string, outputFileName: string }) => {
   return shell.exec(`convert ${MEDIA_PATH}/${inputFileName} -quality ${quality} ${OUTPUT_PATH}/${outputFileName}`)
 };
+
+export const Quality2 = ({ quality, inputFileName, outputFileName }: { quality: number, inputFileName: string, outputFileName: string }) => {
+  return shell.exec(`convert ${inputFileName} -quality ${quality} ${OUTPUT_PATH}/${outputFileName}`)
+};
