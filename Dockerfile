@@ -15,7 +15,7 @@ RUN node --version
 
 # install imageMagick
 RUN apt-get install -y imagemagick
-ENV MAGICK_CONFIGURE_PATH=/home/app/policy.xml
+RUN mv policy.xml /etc/ImageMagick-6/
 
 # Ensure you are in the proper directory
 RUN npm ci \
