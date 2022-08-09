@@ -2,19 +2,47 @@ import Fastify, { FastifyInstance } from 'fastify'
 import { Resize, Reduce, Quality, Thumbnail, Format } from './util/commands';
 import { loadFile, writeFile, createFolders } from './util/files';
 import fileUpload from 'fastify-file-upload';
+import { logger } from '@/src/util/logging';
 
 const server: FastifyInstance = Fastify({})
+const env = 'local';
 
 // Set Max Limits
 server.register(fileUpload, {
   limits: { fileSize: 3 * 1024 * 1024 },
 })
 
-// server.addHook('onRequest', (request, reply, done) => {
-//   console.log({ request });
-//   console.log(request?.raw.rawHeaders)
-//   done();
-// })
+// Check user status
+server.addHook('onRequest', (request, reply, done) => {
+  // Validate user token and check usage rate
+
+  // Reply if user is not authenticated
+  done();
+})
+
+server.addHook('preValidation', (request, reply, done) => {
+  logger.log({
+    message: `Info - [${request?.url}] (${env})`,
+    action: request?.url,
+    body: request?.body,
+    env,
+  })
+  console.log('action: ', request.url)
+  console.log('body:', request.body) // Perform validation
+  // request.body = { ...request.body, importantKey: 'randomString' }
+  done();
+})
+
+server.addHook('onError', (request, reply, error, done) => {
+  logger.log({
+    message: `Error - [${request?.url}] (${env})`,
+    action: request?.url,
+    body: request?.body,
+    env,
+  })
+  done();
+})
+
 
 server.post('/resize', async (request, reply) => {
   // For URL

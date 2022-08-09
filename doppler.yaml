@@ -1,0 +1,3 @@
+setup:
+  project: encodex-services
+  config: local

@@ -13,9 +13,16 @@ export const OUTPUT_PATH = './output'
   Format - (JPG, PNG, GIF) - DONE ✅
 */
 
-// TODO: Building for API Rate Usage and Data Retention
 /*
-  TODO: Rate Limiting, Determine Membership, Authentication, Authorization, Error Handling and Valdiation.
+  TODO: 
+  Logging - ✅
+  Doppler
+  Rate Limiting
+  Determine Membership
+  Authentication
+  Authorization 
+  Error Handling 
+  Valdiation
 */
 
 export const Resize = ({ dimensions, inputFileName, outputFileName, url }: { dimensions: string, inputFileName?: string, outputFileName: string, url?: string }) => {

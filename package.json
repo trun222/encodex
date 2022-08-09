@@ -9,8 +9,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm:dev:*\"",
-    "dev:watch": "ts-node-dev --no-notify --respawn --transpile-only -r tsconfig-paths/register ./src",
-    "build": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./.dist",
+    "dev:watch": "doppler run -- ts-node-dev --no-notify --respawn --transpile-only -r tsconfig-paths/register ./src",
+    "build": "doppler run -- tsc && tscpaths -p ./tsconfig.json -s ./src -o ./.dist",
     "format": "prettier --write '**/*.{ts,tsx,yml,yaml}'",
     "lint": "eslint . --ext .ts --max-warnings=0 --fix"
   },
@@ -23,6 +23,7 @@
     "fastify-file-upload": "^4.0.0",
     "http": "^0.0.1-security",
     "jsonwebtoken": "^8.5.1",
+    "logzio-nodejs": "^2.1.4",
     "query-string": "^7.1.0",
     "shelljs": "^0.8.5",
     "slugify": "^1.6.3",
