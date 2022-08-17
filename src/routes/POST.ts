@@ -3,6 +3,7 @@ import { ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, FormatSchem
 import { v4 as uuidv4 } from 'uuid';
 import { Resize, Reduce, Quality, Thumbnail, Format } from '@/src/util/commands';
 import { loadFile, writeFile, fileNameWithExtension } from '@/src/util/files';
+import { UpdateUsage } from '@/src/util/usage';
 
 export default (server) => {
   // Only use the instance once
@@ -50,7 +51,7 @@ export default (server) => {
       mimeType,
     })
 
-    return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
+    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
   })
 
   server.post('/thumbnail', ThumbnailSchema, async (request, reply) => {
@@ -72,7 +73,7 @@ export default (server) => {
       mimeType
     })
 
-    return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
+    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
   })
 
   server.post('/reduce', ReduceSchema, async (request, reply) => {
@@ -93,7 +94,7 @@ export default (server) => {
       mimeType
     });
 
-    return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
+    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
   })
 
   server.post('/quality', QualitySchema, async (request, reply) => {
@@ -114,7 +115,7 @@ export default (server) => {
       mimeType,
     });
 
-    return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
+    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
   });
 
   server.post('/format', FormatSchema, async (request, reply) => {
@@ -133,6 +134,6 @@ export default (server) => {
       mimeType: format,
     });
 
-    return { file: await loadFile(fileNameWithExtension(outputFileName, format), 'output') };
+    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, format), 'output') });
   });
 }

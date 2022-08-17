@@ -19,12 +19,11 @@ export const OUTPUT_PATH = './output'
   Doppler - ✅
   API Token - ✅
   Planet Scale - ✅
-  Authorization 
   Rate Limiting - ✅
   Determine Membership - ✅
-  Error Handling 
-  Valdiation
-  File Size Checks 
+  Validation - ✅
+  Error Handling - ✅
+  File Size Checks - ✅
 */
 
 export const Resize = ({ dimensions, inputFileName, outputFileName, mimeType }: { dimensions: string, inputFileName: string, outputFileName: string, mimeType: string }) => {
@@ -40,7 +39,7 @@ export const Reduce = ({ percentage, inputFileName, outputFileName, mimeType }: 
 };
 
 export const Quality = ({ quality, inputFileName, outputFileName, mimeType }: { quality: number, inputFileName: string, outputFileName: string, mimeType: string }) => {
-  return shell.exec(`convert ${inputPath(inputFileName)} -quality ${quality} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
+  return shell.exec(`convert ${inputPath(inputFileName)} -quality ${quality}% ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
 
 export const Format = ({ inputFileName, outputFileName, mimeType }: { inputFileName: string, outputFileName: string, mimeType: string }) => {

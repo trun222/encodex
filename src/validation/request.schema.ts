@@ -1,3 +1,9 @@
+const token = {
+  type: 'string',
+  minLength: 36,
+  maxLength: 36,
+};
+
 export const ResizeSchema = {
   schema: {
     headers: {
@@ -6,9 +12,7 @@ export const ResizeSchema = {
         'Content-Type': {
           type: 'string',
         },
-        token: {
-          type: 'string',
-        },
+        token,
       },
       required: ['token'],
     },
@@ -48,9 +52,7 @@ export const ThumbnailSchema = {
         'Content-Type': {
           type: 'string',
         },
-        token: {
-          type: 'string',
-        },
+        token
       },
       required: ['token'],
     },
@@ -91,9 +93,7 @@ export const ReduceSchema = {
         'Content-Type': {
           type: 'string',
         },
-        token: {
-          type: 'string',
-        },
+        token
       },
       required: ['token'],
     },
@@ -105,7 +105,9 @@ export const ReduceSchema = {
           contentEncoding: '7bit',
         },
         percentage: {
-          type: 'string',
+          type: 'number',
+          minimum: 1,
+          maximum: 100,
         },
         outputFileName: {
           type: 'string',
@@ -126,9 +128,7 @@ export const QualitySchema = {
         'Content-Type': {
           type: 'string',
         },
-        token: {
-          type: 'string',
-        },
+        token
       },
       required: ['token'],
     },
@@ -141,6 +141,8 @@ export const QualitySchema = {
         },
         quality: {
           type: 'number',
+          minimum: 1,
+          maximum: 100,
         },
         outputFileName: {
           type: 'string',
@@ -161,9 +163,7 @@ export const FormatSchema = {
         'Content-Type': {
           type: 'string',
         },
-        token: {
-          type: 'string',
-        },
+        token
       },
       required: ['token'],
     },
@@ -176,6 +176,7 @@ export const FormatSchema = {
         },
         format: {
           type: 'string',
+          enum: ['image/jpg', 'image/jpeg', 'image/png', 'image/gif']
         },
         outputFileName: {
           type: 'string',

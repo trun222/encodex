@@ -10,7 +10,7 @@ const server: FastifyInstance = Fastify({});
 ((async () => {
   // Set Max Limits
   server.register(fileUpload, {
-    limits: { fileSize: 3 * 1024 * 1024 },
+    limits: { fileSize: 100 * 1024 * 1024 },
   })
 
   // Lifecycle hooks

@@ -46,10 +46,22 @@ export default (server) => {
 
   server.addHook('preValidation', (request, reply, done) => {
     let temp = {};
+
+    // If the request is a file upload
     if ((request?.body as any)?.file) {
       Object.keys(request.body).filter((key: string) => key !== 'file').forEach(key => {
         temp[key] = request.body[key];
       })
+
+      // Handle File size limits based on membership
+      const fileSize = (request?.body as any)?.file?.size;
+      const membership = request.headers.user?.membership;
+
+      if (fileSize > UsageLimits[membership].maxFileSize) {
+        reply.code(400).send({
+          message: 'File size exceeds maximum allowed',
+        });
+      }
     }
 
     logger.log({
@@ -77,15 +89,5 @@ export default (server) => {
       env,
     })
     done();
-  })
-
-
-  server.addHook('onResponse', async (request, reply, done) => {
-    if (request.url !== '/user' && request.url !== '/signup') {
-      const user = request?.headers?.user as any;
-      // Update the quota for the user
-      await Prisma.updateUsage(user?.email, user?.usage?.apiUsage + 1, UsageType.API);
-      done();
-    }
   })
 }
