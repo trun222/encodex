@@ -1,5 +1,6 @@
 import shell from 'shelljs';
 import { fileNameWithExtension, inputPath, outputPath } from '@/src//util/files';
+
 export const MEDIA_PATH = './media'
 export const OUTPUT_PATH = './output'
 
