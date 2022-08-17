@@ -1,10 +1,11 @@
 import Fastify, { FastifyInstance } from 'fastify'
 import { Resize, Reduce, Quality, Thumbnail, Format } from './util/commands';
-import { loadFile, writeFile, createFolders } from './util/files';
+import { loadFile, writeFile, createFolders, fileNameWithExtension } from './util/files';
 import fileUpload from 'fastify-file-upload';
 import { logger } from '@/src/util/logging';
 import { v4 as uuidv4 } from 'uuid';
 import UserPrisma, { UsageType } from './lib/User.prisma';
+import { ResizeSchema } from '@/src/validation/request.schema';
 
 const UsageLimits = {
   free: { api: 10, storage: 0 },
@@ -18,7 +19,6 @@ const env = process?.env?.ENV;
 // Only use the instance once
 const Prisma = new UserPrisma();
 
-
 // Set Max Limits
 server.register(fileUpload, {
   limits: { fileSize: 3 * 1024 * 1024 },
@@ -29,27 +29,35 @@ server.addHook('onRequest', async (request: any, reply, done) => {
   // For every endpoint except /signup require a token
   if (request.url !== '/signup') {
     const { token }: any = request?.headers;
-    const user = await Prisma.getUser({ token });
 
-    // Check that user token is valid
-    if (token !== user?.token) {
-      reply.code(400).send({
-        message: 'Invalid token',
-      });
-    }
+    if (token) {
+      const user = await Prisma.getUser({ token });
 
-    // Do not check rate limit for /user endpoint
-    if (request.url !== '/user') {
-      // Check that user hasn't exceeded their usage limits
-      if (user?.usage?.apiUsage === UsageLimits[user?.membership!].api) {
+      // Check that user token is valid
+      if (token !== user?.token) {
         reply.code(400).send({
-          message: 'Reached API usage limit',
+          message: 'Invalid token',
         });
       }
+
+      // Do not check rate limit for /user endpoint
+      if (request.url !== '/user') {
+        // Check that user hasn't exceeded their usage limits
+        if (user?.usage?.apiUsage === UsageLimits[user?.membership!].api) {
+          reply.code(400).send({
+            message: 'Reached API usage limit',
+          });
+        }
+      }
+      // Set the user
+      request.headers.user = user;
+      done();
+
+    } else {
+      reply.code(400).send({
+        message: 'Missing token',
+      });
     }
-    // Set the user
-    request.headers.user = user;
-    done();
   }
 })
 
@@ -117,65 +125,58 @@ server.get('/user', async (request, reply) => {
   };
 });
 
-server.post('/resize', async (request: any, reply) => {
-  try {
-    // For URL
-    const { dimensions, outputFileName, url }: any = request?.body;
-    // For FILE
-    const name = (request?.body as any)?.file?.name;
-    const data = (request?.body as any)?.file?.data;
-    const fileDimensions = (request?.body as any)?.dimensions;
+server.post('/resize', ResizeSchema, async (request: any, reply) => {
+  const name = (request?.body as any)?.file?.name;
+  const data = (request?.body as any)?.file?.data;
+  const mimeType = (request?.body as any)?.file?.mimetype;
+  // const contentSize = (request?.body as any)?.file?.size;
+  const height = (request?.body as any)?.height;
+  const width = (request?.body as any)?.width;
+  const outputFileName = (request?.body as any)?.outputFileName;
 
-    // For File
-    if (name && data) {
-      await writeFile(name, './media', data);
-    }
-
-    Resize({
-      dimensions: dimensions || fileDimensions,
-      inputFileName: name,
-      outputFileName,
-      url
-    })
-
-    return { file: await loadFile(outputFileName, 'output') };
-  } catch (e) {
-    return Error('Error resizing image');
+  if (name && data) {
+    await writeFile(name, './media', data);
   }
+
+  Resize({
+    dimensions: `${width}x${height}`,
+    inputFileName: name,
+    outputFileName,
+    mimeType,
+  })
+
+  return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
 })
 
 server.post('/thumbnail', async (request, reply) => {
-  // For URL
-  const { dimensions, outputFileName, url }: any = request?.body;
-  // For FILE
   const name = (request?.body as any)?.file?.name;
   const data = (request?.body as any)?.file?.data;
-  const fileDimensions = (request?.body as any)?.dimensions;
+  const mimeType = (request?.body as any)?.file?.mimetype;
+  const outputFileName = (request?.body as any)?.outputFileName;
+  const height = (request?.body as any)?.height;
+  const width = (request?.body as any)?.width;
 
-  // For File
   if (name && data) {
     await writeFile(name, './media', data);
   }
 
   Thumbnail({
-    dimensions: dimensions || fileDimensions,
+    dimensions: `${width}x${height}`,
     inputFileName: name,
     outputFileName,
-    url
+    mimeType
   })
 
-  return { file: await loadFile(outputFileName, 'output') };
+  return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
 })
 
 server.post('/reduce', async (request, reply) => {
-  // For URL
-  const { percentage, url, outputFileName }: any = request.body;
-  // For FILE
   const name = (request?.body as any)?.file?.name;
   const data = (request?.body as any)?.file?.data;
-  const filePercentage = (request?.body as any)?.percentage;
+  const percentage = (request?.body as any)?.percentage;
+  const mimeType = (request?.body as any)?.file?.mimetype;
+  const outputFileName = (request?.body as any)?.outputFileName;
 
-  // For File
   if (name && data) {
     await writeFile(name, './media', data);
   }
@@ -183,21 +184,20 @@ server.post('/reduce', async (request, reply) => {
   Reduce({
     inputFileName: name,
     outputFileName,
-    percentage: percentage || filePercentage,
-    url
+    percentage,
+    mimeType
   });
 
-  return { file: await loadFile(outputFileName, 'output') };
+  return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
 })
 
 server.post('/quality', async (request, reply) => {
-  // For URL
-  const { quality, outputFileName, url }: any = request?.body;
-  // For FILE
   const name = (request?.body as any)?.file?.name;
   const data = (request?.body as any)?.file?.data;
+  const mimeType = (request?.body as any)?.file?.mimetype;
+  const quality = (request?.body as any)?.quality;
+  const outputFileName = (request?.body as any)?.outputFileName;
 
-  // For File
   if (name && data) {
     await writeFile(name, './media', data);
   }
@@ -206,31 +206,29 @@ server.post('/quality', async (request, reply) => {
     inputFileName: name,
     outputFileName,
     quality,
-    url
+    mimeType,
   });
 
-  return { file: await loadFile(outputFileName, 'output') };
+  return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
 });
 
 server.post('/format', async (request, reply) => {
-  // For URL
-  const { format, outputFileName, url }: any = request?.body;
-  // For FILE
   const name = (request?.body as any)?.file?.name;
   const data = (request?.body as any)?.file?.data;
+  const mimeType = (request?.body as any)?.file?.mimetype;
+  const outputFileName = (request?.body as any)?.outputFileName;
 
-  // For File
   if (name && data) {
     await writeFile(name, './media', data);
   }
 
   Format({
     inputFileName: name,
-    outputFileName: format === '.png' ? outputFileName + '.png' : outputFileName + '.jpg',
-    url
+    outputFileName,
+    mimeType
   });
 
-  return { file: await loadFile(format === '.png' ? outputFileName + '.png' : outputFileName + '.jpg', 'output') };
+  return { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') };
 });
 
 (async () => {

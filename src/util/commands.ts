@@ -1,5 +1,5 @@
 import shell from 'shelljs';
-
+import { fileNameWithExtension, inputPath, outputPath } from '@/src//util/files';
 export const MEDIA_PATH = './media'
 export const OUTPUT_PATH = './output'
 
@@ -14,7 +14,6 @@ export const OUTPUT_PATH = './output'
 */
 
 /*
-  TODO: 
   Logging - ✅
   Doppler - ✅
   API Token - ✅
@@ -24,49 +23,28 @@ export const OUTPUT_PATH = './output'
   Determine Membership - ✅
   Error Handling 
   Valdiation
+  File Size Checks 
 */
 
-export const Resize = ({ dimensions, inputFileName, outputFileName, url }: { dimensions: string, inputFileName?: string, outputFileName: string, url?: string }) => {
-  if (url) {
-    return shell.exec(`convert ${url} -resize ${dimensions} ${OUTPUT_PATH}/${outputFileName}`);
-  } else {
-    return shell.exec(`convert ${MEDIA_PATH}/${inputFileName} -resize ${dimensions} ${OUTPUT_PATH}/${outputFileName}`);
-  }
+export const Resize = ({ dimensions, inputFileName, outputFileName, mimeType }: { dimensions: string, inputFileName: string, outputFileName: string, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} -resize ${dimensions} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
 
-export const Thumbnail = ({ dimensions, inputFileName, outputFileName, url }: { dimensions: string, inputFileName?: string, outputFileName: string, url?: string }) => {
-  if (url) {
-    return shell.exec(`convert ${url} -thumbnail ${dimensions} ${OUTPUT_PATH}/${outputFileName}`);
-  } else {
-    return shell.exec(`convert ${MEDIA_PATH}/${inputFileName} -thumbnail ${dimensions} ${OUTPUT_PATH}/${outputFileName}`);
-  }
+export const Thumbnail = ({ dimensions, inputFileName, outputFileName, mimeType }: { dimensions: string, inputFileName: string, outputFileName: string, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} -thumbnail ${dimensions} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
 
-export const Reduce = ({ percentage, inputFileName, outputFileName, url }: { percentage: number, inputFileName: string, outputFileName: string, url?: string }) => {
-  if (url) {
-    return shell.exec(`convert ${url} -resize ${percentage} ${OUTPUT_PATH}/${outputFileName}`);
-  } else {
-    return shell.exec(`convert ${MEDIA_PATH}/${inputFileName} -resize ${percentage} ${OUTPUT_PATH}/${outputFileName}`);
-  }
+export const Reduce = ({ percentage, inputFileName, outputFileName, mimeType }: { percentage: number, inputFileName: string, outputFileName: string, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} -resize ${percentage} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
 
-export const Quality = ({ quality, inputFileName, outputFileName, url }: { quality: number, inputFileName?: string, outputFileName: string, url?: string }) => {
-  if (url) {
-    return shell.exec(`convert ${url} -quality ${quality} ${OUTPUT_PATH}/${outputFileName}`);
-  } else {
-    return shell.exec(`convert ${MEDIA_PATH}/${inputFileName} -quality ${quality} ${OUTPUT_PATH}/${outputFileName}`);
-  }
+export const Quality = ({ quality, inputFileName, outputFileName, mimeType }: { quality: number, inputFileName: string, outputFileName: string, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} -quality ${quality} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
 
-export const Format = ({ inputFileName, outputFileName, url }: { inputFileName?: string, outputFileName: string, url?: string }) => {
-  if (url) {
-    return shell.exec(`convert ${url} ${OUTPUT_PATH}/${outputFileName}`);
-  } else {
-    return shell.exec(`convert ${MEDIA_PATH}/${inputFileName} ${OUTPUT_PATH}/${outputFileName}`);
-  }
+export const Format = ({ inputFileName, outputFileName, mimeType }: { inputFileName: string, outputFileName: string, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
-
-
 
 // export const Quality2 = async ({ quality, inputFileName, outputFileName }: { quality: number, inputFileName: string, outputFileName: string }) => {
 //   return new Promise((resolve, reject) => {

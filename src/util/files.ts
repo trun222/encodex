@@ -1,5 +1,6 @@
 import fsPromise from 'fs/promises';
 import fs from 'fs';
+import { MimeToExtension } from '@/src/util/mimeTypes';
 
 export const MEDIA_PATH = './media'
 export const OUTPUT_PATH = './output'
@@ -19,4 +20,16 @@ export const loadFile = async (fileName: string, directory: string): Promise<Buf
 
 export const writeFile = async (fileName: string, directory: string, buffer: Buffer): Promise<void> => {
   return await fsPromise.writeFile(`./${directory}/${fileName}`, buffer);
+}
+
+export const fileNameWithExtension = (name: string, mimeType): string => {
+  return `${name}${MimeToExtension[mimeType]}`;
+}
+
+export const inputPath = (fileName: string): string => {
+  return `${MEDIA_PATH}/${fileName}`;
+}
+
+export const outputPath = (fileName: string): string => {
+  return `${OUTPUT_PATH}/${fileName}`;
 }
