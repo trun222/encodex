@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model Usage {
+  id               Int      @id @default(autoincrement())
+  userId           Int      @unique
+  apiUsage         Int
+  storageUsage     Float
+  subscriptionDate DateTime @default(now())
+  User             User     @relation(fields: [userId], references: [id])
+}
+
+model ContactInfo {
+  id        Int    @id @default(autoincrement())
+  firstName String @db.VarChar(255)
+  lastName  String @db.VarChar(255)
+  address   String @db.VarChar(255)
+  city      String @db.VarChar(255)
+  state     String @db.VarChar(255)
+  zip       String @db.VarChar(255)
+  userId    Int    @unique
+  User      User[]
+
+  @@index(userId)
+}
+
+model User {
+  id          Int         @id @default(autoincrement())
+  email       String      @unique
+  token       String      @unique @db.VarChar(255)
+  membership  String      @default("free") @db.VarChar(255)
+  contactInfo ContactInfo @relation(fields: [id], references: [id])
+  usage       Usage?
+}

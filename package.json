@@ -12,12 +12,14 @@
     "dev:watch": "doppler run -- ts-node-dev --no-notify --respawn --transpile-only -r tsconfig-paths/register ./src",
     "build": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./.dist",
     "format": "prettier --write '**/*.{ts,tsx,yml,yaml}'",
-    "lint": "eslint . --ext .ts --max-warnings=0 --fix"
+    "lint": "eslint . --ext .ts --max-warnings=0 --fix",
+    "db:schema:push": "doppler run -- npx prisma db push"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^4.2.1",
     "@zerollup/ts-transform-paths": "^1.7.18",
     "fastify": "^4.3.0",
     "fastify-file-upload": "^4.0.0",
@@ -28,10 +30,11 @@
     "shelljs": "^0.8.5",
     "slugify": "^1.6.3",
     "ts-pattern": "^3.3.5",
-    "tscpaths": "0.0.9"
+    "tscpaths": "0.0.9",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@types/node": "^17.0.8",
+    "@types/node": "^17.0.45",
     "@typescript-eslint/parser": "^5.21.0",
     "@typescript-eslint/typescript-estree": "^4.33.0",
     "concurrently": "^7.0.0",
@@ -43,6 +46,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
+    "prisma": "^4.2.0",
     "ts-node": "^10.4.0",
     "ts-node-dev": "^1.1.8",
     "tsc-watch": "^4.5.0",

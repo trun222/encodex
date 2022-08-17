@@ -17,11 +17,11 @@ export const OUTPUT_PATH = './output'
   TODO: 
   Logging - ✅
   Doppler - ✅
-  Authentication
+  API Token - ✅
+  Planet Scale - ✅
   Authorization 
-  Planet Scale - 
-  Rate Limiting
-  Determine Membership
+  Rate Limiting - ✅
+  Determine Membership - ✅
   Error Handling 
   Valdiation
 */
