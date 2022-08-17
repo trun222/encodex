@@ -1,14 +1,10 @@
-import UserPrisma from '@/src/lib/User.prisma';
 import { ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, FormatSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { Resize, Reduce, Quality, Thumbnail, Format } from '@/src/util/commands';
 import { loadFile, writeFile, fileNameWithExtension } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 
-export default (server) => {
-  // Only use the instance once
-  const Prisma = new UserPrisma();
-
+export default (server, Prisma) => {
   server.post('/signup', async (request, reply) => {
     const { email, contact }: any = request?.body;
     const isUser = await Prisma.getUser({ email });
@@ -31,7 +27,54 @@ export default (server) => {
     }
   });
 
+  server.post('/upload', async (request, reply) => {
+    const uploadId = uuidv4();
+
+    const name = (request?.body as any)?.file?.name;
+    const data = (request?.body as any)?.file?.data;
+    const mimeType = (request?.body as any)?.file?.mimetype;
+
+
+    if (name && data) {
+      await writeFile(fileNameWithExtension(uploadId, mimeType), './media', data);
+    }
+
+    return {
+      id: uploadId,
+    }
+  });
+
+
+
+
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
+    // const name = (request?.body as any)?.file?.name;
+    // const data = (request?.body as any)?.file?.data;
+    // const mimeType = (request?.body as any)?.file?.mimetype;
+    // const contentSize = (request?.body as any)?.file?.size;
+    const height = (request?.body as any)?.height;
+    const width = (request?.body as any)?.width;
+    const outputFileName = (request?.body as any)?.outputFileName;
+    const id = (request?.body as any)?.id;
+
+
+    // const file = await loadFile(fileNameWithExtension(id, 'image/jpg'), 'media')
+
+    // if (name && data) {
+    //   await writeFile(name, './media', data);
+    // }
+
+    Resize({
+      dimensions: `${width}x${height}`,
+      inputFileName: fileNameWithExtension(id, 'image/jpg'),
+      outputFileName,
+      mimeType: 'image/jpg',
+    })
+
+    return UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, 'image/jpg'), 'output') });
+  })
+
+  server.post('/resizeV1', ResizeSchema, async (request: any, reply) => {
     const name = (request?.body as any)?.file?.name;
     const data = (request?.body as any)?.file?.data;
     const mimeType = (request?.body as any)?.file?.mimetype;
@@ -51,7 +94,7 @@ export default (server) => {
       mimeType,
     })
 
-    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
+    return UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
   })
 
   server.post('/thumbnail', ThumbnailSchema, async (request, reply) => {
@@ -73,7 +116,7 @@ export default (server) => {
       mimeType
     })
 
-    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
+    return UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
   })
 
   server.post('/reduce', ReduceSchema, async (request, reply) => {
@@ -94,7 +137,7 @@ export default (server) => {
       mimeType
     });
 
-    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
+    return UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
   })
 
   server.post('/quality', QualitySchema, async (request, reply) => {
@@ -115,7 +158,7 @@ export default (server) => {
       mimeType,
     });
 
-    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
+    return UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
   });
 
   server.post('/format', FormatSchema, async (request, reply) => {
@@ -134,6 +177,6 @@ export default (server) => {
       mimeType: format,
     });
 
-    return UpdateUsage(request, { file: await loadFile(fileNameWithExtension(outputFileName, format), 'output') });
+    return UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, format), 'output') });
   });
 }

@@ -22,7 +22,7 @@ export const writeFile = async (fileName: string, directory: string, buffer: Buf
   return await fsPromise.writeFile(`./${directory}/${fileName}`, buffer);
 }
 
-export const fileNameWithExtension = (name: string, mimeType): string => {
+export const fileNameWithExtension = (name: string, mimeType: string): string => {
   return `${name}${MimeToExtension[mimeType]}`;
 }
 

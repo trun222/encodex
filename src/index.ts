@@ -4,8 +4,10 @@ import fileUpload from 'fastify-file-upload';
 import Hooks from '@/src/util/hooks';
 import GET from '@/src/routes/GET';
 import POST from '@/src/routes/POST';
+import UserPrisma from '@/src/lib/User.prisma';
 
 const server: FastifyInstance = Fastify({});
+const Prisma = new UserPrisma();
 
 ((async () => {
   // Set Max Limits
@@ -14,11 +16,11 @@ const server: FastifyInstance = Fastify({});
   })
 
   // Lifecycle hooks
-  Hooks(server);
+  Hooks(server, Prisma);
   // All Get Routes
-  GET(server);
+  GET(server, Prisma);
   // All Post Routes
-  POST(server);
+  POST(server, Prisma);
 }
 ))();
 

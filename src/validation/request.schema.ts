@@ -39,7 +39,7 @@ export const ResizeSchema = {
           maxLength: 120
         }
       },
-      required: ['file', 'height', 'width', 'outputFileName'],
+      required: ['height', 'width', 'outputFileName'],
     }
   }
 }

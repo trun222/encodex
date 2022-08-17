@@ -1,13 +1,9 @@
-import UserPrisma, { UsageType } from '@/src/lib/User.prisma';
 import { logger } from '@/src/util/logging';
 import { UsageLimits } from '@/src/util/usage';
 
 const env = process?.env?.ENV;
 
-export default (server) => {
-  // Only use the instance once
-  const Prisma = new UserPrisma();
-
+export default (server, Prisma) => {
   server.addHook('onRequest', async (request: any, reply, done) => {
     // For every endpoint except /signup require a token
     if (request.url !== '/signup') {
