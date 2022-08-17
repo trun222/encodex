@@ -27,69 +27,34 @@ export default (server, Prisma) => {
     }
   });
 
+  // NOTE: With Upload we save about 1 second or more on a response. Which is huge
+  // TODO: Ensure usage is calculated and enforced properly for this endpoint
   server.post('/upload', async (request, reply) => {
     const uploadId = uuidv4();
-
     const name = (request?.body as any)?.file?.name;
     const data = (request?.body as any)?.file?.data;
     const mimeType = (request?.body as any)?.file?.mimetype;
-
 
     if (name && data) {
       await writeFile(fileNameWithExtension(uploadId, mimeType), './media', data);
     }
 
     return {
-      id: uploadId,
+      uploadId,
     }
   });
 
-
-
-
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
-    // const name = (request?.body as any)?.file?.name;
-    // const data = (request?.body as any)?.file?.data;
-    // const mimeType = (request?.body as any)?.file?.mimetype;
-    // const contentSize = (request?.body as any)?.file?.size;
     const height = (request?.body as any)?.height;
     const width = (request?.body as any)?.width;
     const outputFileName = (request?.body as any)?.outputFileName;
     const id = (request?.body as any)?.id;
+    const mimeType = (request?.body as any)?.mimeType;
 
-
-    // const file = await loadFile(fileNameWithExtension(id, 'image/jpg'), 'media')
-
-    // if (name && data) {
-    //   await writeFile(name, './media', data);
-    // }
 
     Resize({
       dimensions: `${width}x${height}`,
-      inputFileName: fileNameWithExtension(id, 'image/jpg'),
-      outputFileName,
-      mimeType: 'image/jpg',
-    })
-
-    return UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, 'image/jpg'), 'output') });
-  })
-
-  server.post('/resizeV1', ResizeSchema, async (request: any, reply) => {
-    const name = (request?.body as any)?.file?.name;
-    const data = (request?.body as any)?.file?.data;
-    const mimeType = (request?.body as any)?.file?.mimetype;
-    // const contentSize = (request?.body as any)?.file?.size;
-    const height = (request?.body as any)?.height;
-    const width = (request?.body as any)?.width;
-    const outputFileName = (request?.body as any)?.outputFileName;
-
-    if (name && data) {
-      await writeFile(name, './media', data);
-    }
-
-    Resize({
-      dimensions: `${width}x${height}`,
-      inputFileName: name,
+      inputFileName: fileNameWithExtension(id, mimeType),
       outputFileName,
       mimeType,
     })
@@ -98,20 +63,15 @@ export default (server, Prisma) => {
   })
 
   server.post('/thumbnail', ThumbnailSchema, async (request, reply) => {
-    const name = (request?.body as any)?.file?.name;
-    const data = (request?.body as any)?.file?.data;
-    const mimeType = (request?.body as any)?.file?.mimetype;
     const outputFileName = (request?.body as any)?.outputFileName;
     const height = (request?.body as any)?.height;
     const width = (request?.body as any)?.width;
-
-    if (name && data) {
-      await writeFile(name, './media', data);
-    }
+    const id = (request?.body as any)?.id;
+    const mimeType = (request?.body as any)?.mimeType;
 
     Thumbnail({
       dimensions: `${width}x${height}`,
-      inputFileName: name,
+      inputFileName: fileNameWithExtension(id, mimeType),
       outputFileName,
       mimeType
     })
@@ -120,18 +80,13 @@ export default (server, Prisma) => {
   })
 
   server.post('/reduce', ReduceSchema, async (request, reply) => {
-    const name = (request?.body as any)?.file?.name;
-    const data = (request?.body as any)?.file?.data;
     const percentage = (request?.body as any)?.percentage;
-    const mimeType = (request?.body as any)?.file?.mimetype;
     const outputFileName = (request?.body as any)?.outputFileName;
-
-    if (name && data) {
-      await writeFile(name, './media', data);
-    }
+    const id = (request?.body as any)?.id;
+    const mimeType = (request?.body as any)?.mimeType;
 
     Reduce({
-      inputFileName: name,
+      inputFileName: fileNameWithExtension(id, mimeType),
       outputFileName,
       percentage,
       mimeType
@@ -141,18 +96,13 @@ export default (server, Prisma) => {
   })
 
   server.post('/quality', QualitySchema, async (request, reply) => {
-    const name = (request?.body as any)?.file?.name;
-    const data = (request?.body as any)?.file?.data;
-    const mimeType = (request?.body as any)?.file?.mimetype;
     const quality = (request?.body as any)?.quality;
     const outputFileName = (request?.body as any)?.outputFileName;
-
-    if (name && data) {
-      await writeFile(name, './media', data);
-    }
+    const id = (request?.body as any)?.id;
+    const mimeType = (request?.body as any)?.mimeType;
 
     Quality({
-      inputFileName: name,
+      inputFileName: fileNameWithExtension(id, mimeType),
       outputFileName,
       quality,
       mimeType,
@@ -162,17 +112,13 @@ export default (server, Prisma) => {
   });
 
   server.post('/format', FormatSchema, async (request, reply) => {
-    const name = (request?.body as any)?.file?.name;
-    const data = (request?.body as any)?.file?.data;
     const outputFileName = (request?.body as any)?.outputFileName;
     const format = (request?.body as any)?.format;
-
-    if (name && data) {
-      await writeFile(name, './media', data);
-    }
+    const id = (request?.body as any)?.id;
+    const mimeType = (request?.body as any)?.mimeType;
 
     Format({
-      inputFileName: name,
+      inputFileName: fileNameWithExtension(id, mimeType),
       outputFileName,
       mimeType: format,
     });

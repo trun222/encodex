@@ -79,7 +79,7 @@ export const ThumbnailSchema = {
           maxLength: 120
         }
       },
-      required: ['file', 'height', 'width', 'outputFileName'],
+      required: ['height', 'width', 'outputFileName'],
     }
   }
 }
@@ -115,7 +115,7 @@ export const ReduceSchema = {
           maxLength: 120
         }
       },
-      required: ['file', 'percentage', 'outputFileName'],
+      required: ['percentage', 'outputFileName'],
     }
   }
 }
@@ -150,7 +150,7 @@ export const QualitySchema = {
           maxLength: 120
         }
       },
-      required: ['file', 'quality', 'outputFileName'],
+      required: ['quality', 'outputFileName'],
     }
   }
 }
@@ -184,7 +184,7 @@ export const FormatSchema = {
           maxLength: 120
         }
       },
-      required: ['file', 'format', 'outputFileName'],
+      required: ['format', 'outputFileName'],
     }
   }
 }
