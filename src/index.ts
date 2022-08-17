@@ -73,6 +73,15 @@ server.addHook('onError', (request, reply, error, done) => {
   done();
 })
 
+server.addHook('onResponse', async (request, reply, done) => {
+  if (request.url !== '/user' && request.url !== '/signup') {
+    const user = request?.headers?.user as any;
+    // Update the quota for the user
+    await Prisma.updateUsage(user?.email, user?.usage?.apiUsage + 1, UsageType.API);
+    done();
+  }
+})
+
 server.post('/signup', async (request, reply) => {
   const { email, contact }: any = request?.body;
   const isUser = await Prisma.getUser({ email });
@@ -109,9 +118,6 @@ server.get('/user', async (request, reply) => {
 });
 
 server.post('/resize', async (request: any, reply) => {
-  const token = request?.headers?.token!;
-  const user = request?.headers?.user;
-
   try {
     // For URL
     const { dimensions, outputFileName, url }: any = request?.body;
@@ -119,9 +125,6 @@ server.post('/resize', async (request: any, reply) => {
     const name = (request?.body as any)?.file?.name;
     const data = (request?.body as any)?.file?.data;
     const fileDimensions = (request?.body as any)?.dimensions;
-
-    // Update the quota for the user
-    await Prisma.updateUsage(user?.email, user?.usage?.apiUsage + 1, UsageType.API);
 
     // For File
     if (name && data) {
