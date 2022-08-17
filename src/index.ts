@@ -40,8 +40,6 @@ server.addHook('onRequest', async (request: any, reply, done) => {
 
     // Do not check rate limit for /user endpoint
     if (request.url !== '/user') {
-      console.log('user-usage: ', user?.usage?.apiUsage);
-      console.log('user-api-usage-limit: ', UsageLimits[user?.membership!].api)
       // Check that user hasn't exceeded their usage limits
       if (user?.usage?.apiUsage === UsageLimits[user?.membership!].api) {
         reply.code(400).send({
@@ -49,12 +47,10 @@ server.addHook('onRequest', async (request: any, reply, done) => {
         });
       }
     }
-
     // Set the user
     request.headers.user = user;
+    done();
   }
-
-  done();
 })
 
 server.addHook('preValidation', (request, reply, done) => {
@@ -82,7 +78,7 @@ server.post('/signup', async (request, reply) => {
   const isUser = await Prisma.getUser({ email });
 
   if (isUser?.id) {
-    return reply.code(400).send({
+    reply.code(400).send({
       message: 'User already exists',
     });
   }
@@ -93,7 +89,8 @@ server.post('/signup', async (request, reply) => {
   return {
     id: user.id,
     email: user.email,
-    contact: user.contactInfo,
+    contact: user?.contactInfo,
+    usage: user?.usage,
     token: apiToken,
   }
 });
