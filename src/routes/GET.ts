@@ -1,6 +1,4 @@
-import UserPrisma from '@/src/lib/User.prisma';
-
-export default (server, Prisma) => {
+export default async function GET(server, Prisma) {
   server.get('/user', async (request, reply) => {
     const { token }: any = request?.headers;
     const user = await Prisma.getUser({ token });

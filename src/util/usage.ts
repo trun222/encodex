@@ -1,4 +1,4 @@
-import UserPrisma, { UsageType } from '@/src/lib/User.prisma';
+import { UsageType } from '@/src/lib/User.prisma';
 
 export const UsageLimits = {
   free: { api: 10, storage: 0, maxFileSize: 1 * 1024 * 1024 },

@@ -4,6 +4,7 @@ import { MimeToExtension } from '@/src/util/mimeTypes';
 
 export const MEDIA_PATH = './media'
 export const OUTPUT_PATH = './output'
+export const CHUNK_SIZE = 5 * 1024 * 1024;
 
 export const createFolders = (): void => {
   if (!fs.existsSync(MEDIA_PATH)) {
@@ -16,6 +17,18 @@ export const createFolders = (): void => {
 
 export const loadFile = async (fileName: string, directory: string): Promise<Buffer> => {
   return fsPromise.readFile(`./${directory}/${fileName}`);
+}
+
+export const fileMetaData = async (fileName: string, directory: string): Promise<any> => {
+  const stats = await fsPromise.stat(`./${directory}/${fileName}`);
+  return {
+    name: fileName,
+    size: stats.size,
+  }
+}
+
+export const loadFileStream = async (fileName: string, directory: string): Promise<fs.ReadStream> => {
+  return fs.createReadStream(`./${directory}/${fileName}`, { highWaterMark: 1 * 1024, encoding: 'utf8' });
 }
 
 export const writeFile = async (fileName: string, directory: string, buffer: Buffer): Promise<void> => {

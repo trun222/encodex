@@ -3,7 +3,7 @@ import { UsageLimits } from '@/src/util/usage';
 
 const env = process?.env?.ENV;
 
-export default (server, Prisma) => {
+export default async function Hooks(server, Prisma) {
   server.addHook('onRequest', async (request: any, reply, done) => {
     // For every endpoint except /signup require a token
     if (request.url !== '/signup') {
