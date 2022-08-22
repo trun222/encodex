@@ -89,8 +89,8 @@ const Prisma = new UserPrisma();
     let temp = {};
 
     if ((request?.body as any)?.file) {
-      Object.keys(request.body).filter((key: string) => key !== 'file').forEach(key => {
-        temp[key] = request.body[key];
+      Object.keys((request?.body as any)).filter((key: string) => key !== 'file').forEach(key => {
+        temp[key] = (request?.body as any)[key];
       })
     }
 
