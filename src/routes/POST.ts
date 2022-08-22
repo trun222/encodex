@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Resize, Reduce, Quality, Thumbnail, Format } from '@/src/util/commands';
 import { loadFile, writeFile, loadFileStream, fileMetaData, fileNameWithExtension, CHUNK_SIZE } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
-// import { upload_file_chunks } from '@/src/util/s3';
 
 const s3 = new S3();
 
