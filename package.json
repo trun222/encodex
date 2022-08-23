@@ -21,6 +21,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.150.0",
     "@aws-sdk/s3-request-presigner": "^3.150.0",
+    "@fastify/rate-limit": "^7.3.0",
     "@prisma/client": "^4.2.1",
     "@zerollup/ts-transform-paths": "^1.7.18",
     "fastify": "^4.3.0",
