@@ -1,6 +1,7 @@
 import { UsageLimits } from '@/src/util/usage';
 import UserPrisma from '@/src/lib/User.prisma';
 import { logger } from '@/src/util/logging';
+import * as Sentry from '@sentry/node';
 
 const env = process?.env?.ENV;
 
@@ -86,5 +87,8 @@ export const onError = async (request: any, reply, done) => {
     body: (request?.body as any)?.file ? temp : request.body,
     env,
   })
+
+  Sentry.captureException(request);
+  Sentry.captureMessage('[Hook](onError)', 'error');
   done();
 }

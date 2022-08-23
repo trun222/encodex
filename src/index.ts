@@ -3,7 +3,15 @@ import { createFolders } from '@/src/util/files';
 import fileUpload from 'fastify-file-upload';
 import UserPrisma from '@/src/lib/User.prisma';
 import { onRequest, preValidation, onError } from '@/src/util/hooks';
+import * as Sentry from '@sentry/node';
+import "@sentry/tracing";
 
+Sentry.init({
+  release: 'encodex-graphql@0.0.0',
+  dsn: process.env.SENTRY_DSN,
+  tracesSampleRate: 1.0,
+  environment: process.env.ENV,
+});
 
 const server: FastifyInstance = Fastify({});
 const Prisma = new UserPrisma();
