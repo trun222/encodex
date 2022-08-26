@@ -5,7 +5,7 @@ import UserPrisma from '@/src/lib/User.prisma';
 import { onRequest, preValidation, onError } from '@/src/util/hooks';
 import * as Sentry from '@sentry/node';
 import "@sentry/tracing";
-
+import { Upload } from './routes/POST'
 Sentry.init({
   release: 'encodex-graphql@0.0.0',
   dsn: process.env.SENTRY_DSN,
@@ -26,6 +26,15 @@ const Prisma = new UserPrisma();
     limits: { fileSize: 20 * 1024 * 1024 }, // 20MB size limit
   });
 
+  // Cors
+  // server.register((fastify, options, done) => {
+  //   fastify.register(require("fastify-cors"), {
+  //     origin: "*",
+  //     methods: ["POST"]
+  //   });
+  //   done();
+  // });
+
   // Rate limit based on IP
   server.register(import('@fastify/rate-limit'), {
     max: 100,
@@ -41,7 +50,6 @@ const Prisma = new UserPrisma();
   server.register(require('@/src/routes/POST'), Prisma);
   // GETS
   server.register(require('@/src/routes/GET'), Prisma);
-
 
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
     console.log(

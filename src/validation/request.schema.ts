@@ -19,9 +19,10 @@ export const ResizeSchema = {
     body: {
       type: 'object',
       properties: {
-        file: {
-          contentMediaType: 'multipart/form-data',
-          contentEncoding: '7bit',
+        id: {
+          type: 'string',
+          minLength: 36,
+          maxLength: 36
         },
         height: {
           type: 'number',
@@ -37,6 +38,9 @@ export const ResizeSchema = {
           type: 'string',
           minLength: 8,
           maxLength: 120
+        },
+        mimeType: {
+          type: 'string',
         }
       },
       required: ['height', 'width', 'outputFileName'],

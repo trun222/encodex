@@ -7,7 +7,7 @@ const env = process?.env?.ENV;
 
 const Prisma = new UserPrisma();
 
-export const onRequest = async (request: any, reply, done) => {
+export const onRequest = async (request: any, reply) => {
   // For every endpoint except /signup require a token
   if (request.url !== '/signup') {
     const { token }: any = request?.headers;
@@ -33,17 +33,16 @@ export const onRequest = async (request: any, reply, done) => {
       }
       // Set the user
       request.headers.user = user;
-      done();
-
     } else {
       reply.code(400).send({
         message: 'Missing token',
       });
     }
   }
+  return;
 }
 
-export const preValidation = async (request: any, reply, done) => {
+export const preValidation = async (request: any, reply) => {
   let temp = {};
 
   // If the request is a file upload
@@ -69,10 +68,10 @@ export const preValidation = async (request: any, reply, done) => {
     body: (request?.body as any)?.file ? temp : request.body,
     env,
   })
-  done();
+  return;
 }
 
-export const onError = async (request: any, reply, done) => {
+export const onError = async (request: any, reply) => {
   let temp = {};
 
   if ((request?.body as any)?.file) {
@@ -90,5 +89,5 @@ export const onError = async (request: any, reply, done) => {
 
   Sentry.captureException(request);
   Sentry.captureMessage('[Hook](onError)', 'error');
-  done();
+  return;
 }

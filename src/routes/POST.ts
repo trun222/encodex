@@ -5,6 +5,7 @@ import { Resize, Reduce, Quality, Thumbnail, Format } from '@/src/util/commands'
 import { loadFile, writeFile, loadFileStream, fileMetaData, fileNameWithExtension, CHUNK_SIZE } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
+import base64js from 'base64-js';
 
 const s3 = new S3();
 
@@ -41,9 +42,12 @@ export default async function POST(server, Prisma) {
   server.post('/upload', async (request, reply) => {
     try {
       const uploadId = uuidv4();
-      const name = (request?.body as any)?.file?.name;
-      const data = (request?.body as any)?.file?.data;
-      const mimeType = (request?.body as any)?.file?.mimetype;
+      const data = (request?.body as any);
+      const name = (request.headers as any)?.name;
+      const mimeType = (request.headers as any)?.mimetype;
+
+      console.log({ name, mimeType, uploadId })
+
 
       if (name && data) {
         await writeFile(fileNameWithExtension(uploadId, mimeType), './media', data);
@@ -61,11 +65,17 @@ export default async function POST(server, Prisma) {
 
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
     try {
+      const id = (request?.body as any)?.id;
       const height = (request?.body as any)?.height;
       const width = (request?.body as any)?.width;
       const outputFileName = (request?.body as any)?.outputFileName;
-      const id = (request?.body as any)?.id;
       const mimeType = (request?.body as any)?.mimeType;
+
+      console.log({
+        id,
+        height,
+        width
+      })
 
       Resize({
         dimensions: `${width}x${height}`,
@@ -73,8 +83,10 @@ export default async function POST(server, Prisma) {
         outputFileName,
         mimeType,
       })
-
-      return await UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/resize)', 'error');
@@ -108,8 +120,6 @@ export default async function POST(server, Prisma) {
 
   server.post('/reduce', ReduceSchema, async (request, reply) => {
     try {
-
-
       const percentage = (request?.body as any)?.percentage;
       const outputFileName = (request?.body as any)?.outputFileName;
       const id = (request?.body as any)?.id;
