@@ -4,6 +4,31 @@ const token = {
   maxLength: 36,
 };
 
+export const UploadSchema = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        'Content-Type': {
+          type: 'string',
+        },
+        token,
+      },
+      required: ['token'],
+    },
+    body: {
+      type: 'object',
+      properties: {
+        file: {
+          contentMediaType: 'multipart/form-data',
+          contentEncoding: '7bit',
+        },
+      }
+
+    },
+  }
+}
+
 export const ResizeSchema = {
   schema: {
     headers: {

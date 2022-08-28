@@ -1,5 +1,5 @@
 import { S3 } from './../util/s3';
-import { ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, FormatSchema } from '@/src/validation/request.schema';
+import { UploadSchema, ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, FormatSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { Resize, Reduce, Quality, Thumbnail, Format } from '@/src/util/commands';
 import { loadFile, writeFile, loadFileStream, fileMetaData, fileNameWithExtension, CHUNK_SIZE } from '@/src/util/files';
@@ -42,12 +42,9 @@ export default async function POST(server, Prisma) {
   server.post('/upload', async (request, reply) => {
     try {
       const uploadId = uuidv4();
-      const data = (request?.body as any);
-      const name = (request.headers as any)?.name;
-      const mimeType = (request.headers as any)?.mimetype;
-
-      console.log({ name, mimeType, uploadId })
-
+      const name = (request.body as any)?.file?.name;
+      const data = (request.body as any)?.file?.data;
+      const mimeType = (request.body as any)?.file?.mimetype;
 
       if (name && data) {
         await writeFile(fileNameWithExtension(uploadId, mimeType), './media', data);

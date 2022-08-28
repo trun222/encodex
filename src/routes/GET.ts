@@ -16,7 +16,7 @@ export default async function GET(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[GET](/user)', 'error');
-      return;
+      return e;
     }
   });
 }

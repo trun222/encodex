@@ -32,7 +32,7 @@ export const loadFileStream = async (fileName: string, directory: string): Promi
 }
 
 export const writeFile = async (fileName: string, directory: string, buffer: Buffer): Promise<void> => {
-  return await fsPromise.writeFile(`./${directory}/${fileName}`, buffer);
+  return fsPromise.writeFile(`./${directory}/${fileName}`, buffer, 'utf-8');
 }
 
 export const fileNameWithExtension = (name: string, mimeType: string): string => {
