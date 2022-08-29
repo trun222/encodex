@@ -30,6 +30,10 @@ export const Resize = ({ dimensions, inputFileName, outputFileName, mimeType }: 
   return shell.exec(`convert ${inputPath(inputFileName)} -resize ${dimensions} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
 
+export const Moonlight = ({ inputFileName, outputFileName, moonValue, mimeType }: { inputFileName: string, outputFileName: string, moonValue: number, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} -blue-shift ${moonValue} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
+};
+
 export const Thumbnail = ({ dimensions, inputFileName, outputFileName, mimeType }: { dimensions: string, inputFileName: string, outputFileName: string, mimeType: string }) => {
   return shell.exec(`convert ${inputPath(inputFileName)} -thumbnail ${dimensions} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };

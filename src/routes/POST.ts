@@ -1,7 +1,7 @@
 import { S3 } from './../util/s3';
-import { UploadSchema, ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, FormatSchema } from '@/src/validation/request.schema';
+import { UploadSchema, ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, MoonlightSchema, FormatSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
-import { Resize, Reduce, Quality, Thumbnail, Format } from '@/src/util/commands';
+import { Resize, Reduce, Quality, Thumbnail, Format, Moonlight } from '@/src/util/commands';
 import { loadFile, writeFile, loadFileStream, fileMetaData, fileNameWithExtension, CHUNK_SIZE } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
@@ -87,10 +87,10 @@ export default async function POST(server, Prisma) {
 
   server.post('/thumbnail', ThumbnailSchema, async (request, reply) => {
     try {
+      const id = (request?.body as any)?.id;
       const outputFileName = (request?.body as any)?.outputFileName;
       const height = (request?.body as any)?.height;
       const width = (request?.body as any)?.width;
-      const id = (request?.body as any)?.id;
       const mimeType = (request?.body as any)?.mimeType;
 
       Thumbnail({
@@ -113,9 +113,9 @@ export default async function POST(server, Prisma) {
 
   server.post('/reduce', ReduceSchema, async (request, reply) => {
     try {
+      const id = (request?.body as any)?.id;
       const percentage = (request?.body as any)?.percentage;
       const outputFileName = (request?.body as any)?.outputFileName;
-      const id = (request?.body as any)?.id;
       const mimeType = (request?.body as any)?.mimeType;
 
       Reduce({
@@ -138,9 +138,9 @@ export default async function POST(server, Prisma) {
 
   server.post('/quality', QualitySchema, async (request, reply) => {
     try {
+      const id = (request?.body as any)?.id;
       const quality = (request?.body as any)?.quality;
       const outputFileName = (request?.body as any)?.outputFileName;
-      const id = (request?.body as any)?.id;
       const mimeType = (request?.body as any)?.mimeType;
 
       Quality({
@@ -161,11 +161,37 @@ export default async function POST(server, Prisma) {
     }
   });
 
+  server.post('/moonlight', MoonlightSchema, async (request, reply) => {
+    try {
+      const id = (request?.body as any)?.id;
+      const moonValue = (request?.body as any)?.moonValue;
+      const outputFileName = (request?.body as any)?.outputFileName;
+      const mimeType = (request?.body as any)?.mimeType;
+
+      Moonlight({
+        inputFileName: fileNameWithExtension(id, mimeType),
+        outputFileName,
+        moonValue,
+        mimeType,
+      });
+
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/moonlight)', 'error');
+      return;
+    }
+  });
+
+
   server.post('/format', FormatSchema, async (request, reply) => {
     try {
+      const id = (request?.body as any)?.id;
       const outputFileName = (request?.body as any)?.outputFileName;
       const format = (request?.body as any)?.format;
-      const id = (request?.body as any)?.id;
       const mimeType = (request?.body as any)?.mimeType;
 
       Format({

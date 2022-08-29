@@ -113,7 +113,6 @@ export const ThumbnailSchema = {
   }
 }
 
-
 export const ReduceSchema = {
   schema: {
     headers: {
@@ -180,6 +179,45 @@ export const QualitySchema = {
         }
       },
       required: ['quality', 'outputFileName'],
+    }
+  }
+}
+
+export const MoonlightSchema = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        'Content-Type': {
+          type: 'string',
+        },
+        token
+      },
+      required: ['token'],
+    },
+    body: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
+        moonValue: {
+          type: 'number',
+          minimum: 0,
+          maximum: 100,
+        },
+        outputFileName: {
+          type: 'string',
+          minLength: 8,
+          maxLength: 120
+        },
+        mimeType: {
+          type: 'string',
+        }
+      },
+      required: ['id', 'moonValue', 'outputFileName', 'mimeType'],
     }
   }
 }
