@@ -1,7 +1,7 @@
 import { S3 } from './../util/s3';
-import { UploadSchema, ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, MoonlightSchema, FormatSchema } from '@/src/validation/request.schema';
+import { ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, MoonlightSchema, FormatSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
-import { Resize, Reduce, Quality, Thumbnail, Format, Moonlight } from '@/src/util/commands';
+import { Resize, Reduce, Quality, Thumbnail, Format, Moonlight, Sharpen, Average, Collage, Gray } from '@/src/util/commands';
 import { loadFile, writeFile, loadFileStream, fileMetaData, fileNameWithExtension, CHUNK_SIZE } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
@@ -182,6 +182,102 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/moonlight)', 'error');
+      return;
+    }
+  });
+
+  server.post('/sharpen', async (request, reply) => {
+    try {
+      const id = (request?.body as any)?.id;
+      const sharpenValue = (request?.body as any)?.sharpenValue;
+      const outputFileName = (request?.body as any)?.outputFileName;
+      const mimeType = (request?.body as any)?.mimeType;
+
+      Sharpen({
+        inputFileName: fileNameWithExtension(id, mimeType),
+        outputFileName,
+        sharpenValue,
+        mimeType,
+      });
+
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/sharpen)', 'error');
+      return;
+    }
+  });
+
+  server.post('/average', async (request, reply) => {
+    try {
+      const id = (request?.body as any)?.id;
+      const outputFileName = (request?.body as any)?.outputFileName;
+      const mimeType = (request?.body as any)?.mimeType;
+
+      Average({
+        inputFileName: fileNameWithExtension(id, mimeType),
+        outputFileName,
+        mimeType,
+      });
+
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/average)', 'error');
+      return;
+    }
+  });
+
+  server.post('/gray', async (request, reply) => {
+    try {
+      const id = (request?.body as any)?.id;
+      const outputFileName = (request?.body as any)?.outputFileName;
+      const mimeType = (request?.body as any)?.mimeType;
+
+      Gray({
+        inputFileName: fileNameWithExtension(id, mimeType),
+        outputFileName,
+        mimeType,
+      });
+
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/gray)', 'error');
+      return;
+    }
+  });
+
+  server.post('/collage', async (request, reply) => {
+    try {
+      const idOne = (request?.body as any)?.idOne;
+      const idTwo = (request?.body as any)?.idTwo;
+      const outputFileName = (request?.body as any)?.outputFileName;
+      const mimeType = (request?.body as any)?.mimeType;
+
+      Collage({
+        inputFileNameOne: fileNameWithExtension(idOne, mimeType),
+        inputFileNameTwo: fileNameWithExtension(idTwo, mimeType),
+        outputFileName,
+        mimeType,
+      });
+
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/collage)', 'error');
       return;
     }
   });

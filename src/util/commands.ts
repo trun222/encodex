@@ -34,6 +34,22 @@ export const Moonlight = ({ inputFileName, outputFileName, moonValue, mimeType }
   return shell.exec(`convert ${inputPath(inputFileName)} -blue-shift ${moonValue} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
 
+export const Sharpen = ({ inputFileName, outputFileName, sharpenValue, mimeType }: { inputFileName: string, outputFileName: string, sharpenValue: number, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} -adaptive-sharpen 0x${sharpenValue} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
+};
+
+export const Average = ({ inputFileName, outputFileName, mimeType }: { inputFileName: string, outputFileName: string, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} -auto-level ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
+};
+
+export const Gray = ({ inputFileName, outputFileName, mimeType }: { inputFileName: string, outputFileName: string, mimeType: string }) => {
+  return shell.exec(`convert ${inputPath(inputFileName)} -colorspace gray ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
+};
+
+export const Collage = ({ inputFileNameOne, inputFileNameTwo, outputFileName, mimeType }: { inputFileNameOne: string, inputFileNameTwo: string, outputFileName: string, mimeType: string }) => {
+  return shell.exec(`montage -label %f -frame 5 -geometry +4+4 ${inputPath(inputFileNameOne)} ${inputPath(inputFileNameTwo)} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
+};
+
 export const Thumbnail = ({ dimensions, inputFileName, outputFileName, mimeType }: { dimensions: string, inputFileName: string, outputFileName: string, mimeType: string }) => {
   return shell.exec(`convert ${inputPath(inputFileName)} -thumbnail ${dimensions} ${outputPath(fileNameWithExtension(outputFileName, mimeType))}`);
 };
