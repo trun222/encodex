@@ -68,12 +68,6 @@ export default async function POST(server, Prisma) {
       const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
 
-      console.log({
-        id,
-        height,
-        width
-      })
-
       Resize({
         dimensions: `${width}x${height}`,
         inputFileName: fileNameWithExtension(id, mimeType),
@@ -106,8 +100,10 @@ export default async function POST(server, Prisma) {
         mimeType
       })
 
-      return await UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
-
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/thumbnail)', 'error');
@@ -129,7 +125,10 @@ export default async function POST(server, Prisma) {
         mimeType
       });
 
-      return await UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/reduce)', 'error');
@@ -151,7 +150,10 @@ export default async function POST(server, Prisma) {
         mimeType,
       });
 
-      return await UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output') });
+      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
+      return await UpdateUsage(request, Prisma, {
+        file: convertedBase64
+      });
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/quality)', 'error');
