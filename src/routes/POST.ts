@@ -1,13 +1,13 @@
-import { ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, MoonlightSchema, FormatSchema } from '@/src/validation/request.schema';
+import { ResizeSchema, QualitySchema, MoonlightSchema, SignupSchema, UploadSchema, SharpenSchema, NoExtraParamsSchema, CollageSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
-import { Resize, Reduce, Quality, Thumbnail, Format, Moonlight, Sharpen, Average, Collage, Gray } from '@/src/util/commands';
-import { loadFile, writeFile, loadFileStream, fileMetaData, fileNameWithExtension, CHUNK_SIZE } from '@/src/util/files';
+import { Resize, Quality, Moonlight, Sharpen, Average, Collage, Gray } from '@/src/util/commands';
+import { loadFile, writeFile, fileNameWithExtension } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
 import base64js from 'base64-js';
 
 export default async function POST(server, Prisma) {
-  server.post('/signup', async (request, reply) => {
+  server.post('/signup', SignupSchema, async (request, reply) => {
     try {
       const { email, contact }: any = request?.body;
       const isUser = await Prisma.getUser({ email });
@@ -37,8 +37,7 @@ export default async function POST(server, Prisma) {
     }
   });
 
-  // TODO: Ensure usage is calculated and enforced properly for this endpoint
-  server.post('/upload', async (request, reply) => {
+  server.post('/upload', UploadSchema, async (request, reply) => {
     try {
       const uploadId = uuidv4();
       const name = (request.body as any)?.file?.name;
@@ -146,7 +145,7 @@ export default async function POST(server, Prisma) {
     }
   });
 
-  server.post('/sharpen', async (request, reply) => {
+  server.post('/sharpen', SharpenSchema, async (request, reply) => {
     const id = (request?.body as any)?.id;
 
     try {
@@ -174,7 +173,7 @@ export default async function POST(server, Prisma) {
     }
   });
 
-  server.post('/average', async (request, reply) => {
+  server.post('/average', NoExtraParamsSchema, async (request, reply) => {
     const id = (request?.body as any)?.id;
 
     try {
@@ -200,7 +199,7 @@ export default async function POST(server, Prisma) {
     }
   });
 
-  server.post('/gray', async (request, reply) => {
+  server.post('/gray', NoExtraParamsSchema, async (request, reply) => {
     const id = (request?.body as any)?.id;
 
     try {
@@ -226,7 +225,7 @@ export default async function POST(server, Prisma) {
     }
   });
 
-  server.post('/collage', async (request, reply) => {
+  server.post('/collage', CollageSchema, async (request, reply) => {
     const idOne = (request?.body as any)?.idOne;
     const idTwo = (request?.body as any)?.idTwo;
 
