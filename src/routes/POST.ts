@@ -1,4 +1,3 @@
-import { S3 } from './../util/s3';
 import { ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, MoonlightSchema, FormatSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { Resize, Reduce, Quality, Thumbnail, Format, Moonlight, Sharpen, Average, Collage, Gray } from '@/src/util/commands';
@@ -6,8 +5,6 @@ import { loadFile, writeFile, loadFileStream, fileMetaData, fileNameWithExtensio
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
 import base64js from 'base64-js';
-
-const s3 = new S3();
 
 export default async function POST(server, Prisma) {
   server.post('/signup', async (request, reply) => {
@@ -34,7 +31,9 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/signup)', 'error');
-      return;
+      return {
+        message: 'Failed to sign up user'
+      };
     }
   });
 
@@ -56,24 +55,28 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/upload)', 'error');
-      return;
+      return {
+        message: 'Failed to upload file'
+      };
     }
   });
 
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
+    const id = (request?.body as any)?.id;
+
     try {
-      const id = (request?.body as any)?.id;
       const height = (request?.body as any)?.height;
       const width = (request?.body as any)?.width;
       const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
 
-      Resize({
+      await Resize({
         dimensions: `${width}x${height}`,
         inputFileName: fileNameWithExtension(id, mimeType),
         outputFileName,
         mimeType,
       })
+
       const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
       return await UpdateUsage(request, Prisma, {
         file: convertedBase64
@@ -81,69 +84,21 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/resize)', 'error');
-      return;
-    }
-  })
-
-  server.post('/thumbnail', ThumbnailSchema, async (request, reply) => {
-    try {
-      const id = (request?.body as any)?.id;
-      const outputFileName = (request?.body as any)?.outputFileName;
-      const height = (request?.body as any)?.height;
-      const width = (request?.body as any)?.width;
-      const mimeType = (request?.body as any)?.mimeType;
-
-      Thumbnail({
-        dimensions: `${width}x${height}`,
-        inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
-        mimeType
-      })
-
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
-      return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
-      });
-    } catch (e) {
-      Sentry.captureException(e);
-      Sentry.captureMessage('[POST](/thumbnail)', 'error');
-      return;
-    }
-  })
-
-  server.post('/reduce', ReduceSchema, async (request, reply) => {
-    try {
-      const id = (request?.body as any)?.id;
-      const percentage = (request?.body as any)?.percentage;
-      const outputFileName = (request?.body as any)?.outputFileName;
-      const mimeType = (request?.body as any)?.mimeType;
-
-      Reduce({
-        inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
-        percentage,
-        mimeType
-      });
-
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
-      return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
-      });
-    } catch (e) {
-      Sentry.captureException(e);
-      Sentry.captureMessage('[POST](/reduce)', 'error');
-      return;
+      return {
+        message: `Failed to find file with id ${id}`
+      };
     }
   })
 
   server.post('/quality', QualitySchema, async (request, reply) => {
+    const id = (request?.body as any)?.id;
+
     try {
-      const id = (request?.body as any)?.id;
       const quality = (request?.body as any)?.quality;
       const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
 
-      Quality({
+      await Quality({
         inputFileName: fileNameWithExtension(id, mimeType),
         outputFileName,
         quality,
@@ -157,18 +112,21 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/quality)', 'error');
-      return;
+      return {
+        message: `Failed to find file with id ${id}`
+      };
     }
   });
 
   server.post('/moonlight', MoonlightSchema, async (request, reply) => {
+    const id = (request?.body as any)?.id;
+
     try {
-      const id = (request?.body as any)?.id;
       const moonValue = (request?.body as any)?.moonValue;
       const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
 
-      Moonlight({
+      await Moonlight({
         inputFileName: fileNameWithExtension(id, mimeType),
         outputFileName,
         moonValue,
@@ -182,18 +140,21 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/moonlight)', 'error');
-      return;
+      return {
+        message: `Failed to find file with id ${id}`
+      };
     }
   });
 
   server.post('/sharpen', async (request, reply) => {
+    const id = (request?.body as any)?.id;
+
     try {
-      const id = (request?.body as any)?.id;
       const sharpenValue = (request?.body as any)?.sharpenValue;
       const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
 
-      Sharpen({
+      await Sharpen({
         inputFileName: fileNameWithExtension(id, mimeType),
         outputFileName,
         sharpenValue,
@@ -207,17 +168,20 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/sharpen)', 'error');
-      return;
+      return {
+        message: `Failed to find file with id ${id}`
+      };
     }
   });
 
   server.post('/average', async (request, reply) => {
+    const id = (request?.body as any)?.id;
+
     try {
-      const id = (request?.body as any)?.id;
       const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
 
-      Average({
+      await Average({
         inputFileName: fileNameWithExtension(id, mimeType),
         outputFileName,
         mimeType,
@@ -230,17 +194,20 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/average)', 'error');
-      return;
+      return {
+        message: `Failed to find file with id ${id}`
+      };
     }
   });
 
   server.post('/gray', async (request, reply) => {
+    const id = (request?.body as any)?.id;
+
     try {
-      const id = (request?.body as any)?.id;
       const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
 
-      Gray({
+      await Gray({
         inputFileName: fileNameWithExtension(id, mimeType),
         outputFileName,
         mimeType,
@@ -253,18 +220,21 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/gray)', 'error');
-      return;
+      return {
+        message: `Failed to find file with id ${id}`
+      };
     }
   });
 
   server.post('/collage', async (request, reply) => {
+    const idOne = (request?.body as any)?.idOne;
+    const idTwo = (request?.body as any)?.idTwo;
+
     try {
-      const idOne = (request?.body as any)?.idOne;
-      const idTwo = (request?.body as any)?.idTwo;
       const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
 
-      Collage({
+      await Collage({
         inputFileNameOne: fileNameWithExtension(idOne, mimeType),
         inputFileNameTwo: fileNameWithExtension(idTwo, mimeType),
         outputFileName,
@@ -278,29 +248,32 @@ export default async function POST(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/collage)', 'error');
-      return;
+      return {
+        message: `Failed to find file with id ${idOne} or ${idTwo}`
+      };
     }
   });
 
 
-  server.post('/format', FormatSchema, async (request, reply) => {
-    try {
-      const id = (request?.body as any)?.id;
-      const outputFileName = (request?.body as any)?.outputFileName;
-      const format = (request?.body as any)?.format;
-      const mimeType = (request?.body as any)?.mimeType;
+  // TODO: Hold off on
+  // server.post('/format', FormatSchema, async (request, reply) => {
+  //   try {
+  //     const id = (request?.body as any)?.id;
+  //     const outputFileName = (request?.body as any)?.outputFileName;
+  //     const format = (request?.body as any)?.format;
+  //     const mimeType = (request?.body as any)?.mimeType;
 
-      Format({
-        inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
-        mimeType: format,
-      });
+  //     Format({
+  //       inputFileName: fileNameWithExtension(id, mimeType),
+  //       outputFileName,
+  //       mimeType: format,
+  //     });
 
-      return await UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, format), 'output') });
-    } catch (e) {
-      Sentry.captureException(e);
-      Sentry.captureMessage('[POST](/format)', 'error');
-      return;
-    }
-  });
+  //     return await UpdateUsage(request, Prisma, { file: await loadFile(fileNameWithExtension(outputFileName, format), 'output') });
+  //   } catch (e) {
+  //     Sentry.captureException(e);
+  //     Sentry.captureMessage('[POST](/format)', 'error');
+  //     return;
+  //   }
+  // });
 };
