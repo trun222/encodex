@@ -1,5 +1,5 @@
 import { S3 } from './../util/s3';
-import { ResizeSchema, ThumbnailSchema, ReduceSchema, QualitySchema, FormatSchema } from '@/src/validation/request.schema';
+import { ResizeSchema, QualitySchema, FormatSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { Resize, Reduce, Quality, Thumbnail, Format } from '@/src/util/commands';
 import { loadFile, writeFile, loadFileStream, fileMetaData, fileNameWithExtension, CHUNK_SIZE } from '@/src/util/files';
