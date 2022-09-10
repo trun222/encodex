@@ -4,7 +4,12 @@ import { Resize, Quality, Moonlight, Sharpen, Average, Collage, Gray } from '@/s
 import { loadFile, writeFile, fileNameWithExtension } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
-import base64js from 'base64-js';
+import { convertToBase64 } from '@/src/util/convert';
+
+enum PLATFORM {
+  WEB = 'WEB',
+  SERVER = 'SERVER'
+}
 
 export default async function POST(server, Prisma) {
   server.post('/signup', SignupSchema, async (request, reply) => {
@@ -66,19 +71,18 @@ export default async function POST(server, Prisma) {
     try {
       const height = (request?.body as any)?.height;
       const width = (request?.body as any)?.width;
-      const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
+      const platform = (request?.body as any)?.platform || PLATFORM.WEB;
 
       await Resize({
         dimensions: `${width}x${height}`,
         inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
+        outputFileName: id,
         mimeType,
       })
 
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
       return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
+        file: platform === PLATFORM.WEB ? await convertToBase64({ id, mimeType }) : await loadFile(fileNameWithExtension(id, mimeType), 'output')
       });
     } catch (e) {
       Sentry.captureException(e);
@@ -94,19 +98,18 @@ export default async function POST(server, Prisma) {
 
     try {
       const quality = (request?.body as any)?.quality;
-      const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
+      const platform = (request?.body as any)?.platform || PLATFORM.WEB;
 
       await Quality({
         inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
+        outputFileName: id,
         quality,
         mimeType,
       });
 
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
       return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
+        file: platform === PLATFORM.WEB ? await convertToBase64({ id, mimeType }) : await loadFile(fileNameWithExtension(id, mimeType), 'output')
       });
     } catch (e) {
       Sentry.captureException(e);
@@ -122,19 +125,18 @@ export default async function POST(server, Prisma) {
 
     try {
       const moonValue = (request?.body as any)?.moonValue;
-      const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
+      const platform = (request?.body as any)?.platform || PLATFORM.WEB;
 
       await Moonlight({
         inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
+        outputFileName: id,
         moonValue,
         mimeType,
       });
 
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
       return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
+        file: platform === PLATFORM.WEB ? await convertToBase64({ id, mimeType }) : await loadFile(fileNameWithExtension(id, mimeType), 'output')
       });
     } catch (e) {
       Sentry.captureException(e);
@@ -150,19 +152,18 @@ export default async function POST(server, Prisma) {
 
     try {
       const sharpenValue = (request?.body as any)?.sharpenValue;
-      const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
+      const platform = (request?.body as any)?.platform || PLATFORM.WEB;
 
       await Sharpen({
         inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
+        outputFileName: id,
         sharpenValue,
         mimeType,
       });
 
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
       return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
+        file: platform === PLATFORM.WEB ? await convertToBase64({ id, mimeType }) : await loadFile(fileNameWithExtension(id, mimeType), 'output')
       });
     } catch (e) {
       Sentry.captureException(e);
@@ -177,18 +178,17 @@ export default async function POST(server, Prisma) {
     const id = (request?.body as any)?.id;
 
     try {
-      const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
+      const platform = (request?.body as any)?.platform || PLATFORM.WEB;
 
       await Average({
         inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
+        outputFileName: id,
         mimeType,
       });
 
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
       return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
+        file: platform === PLATFORM.WEB ? await convertToBase64({ id, mimeType }) : await loadFile(fileNameWithExtension(id, mimeType), 'output')
       });
     } catch (e) {
       Sentry.captureException(e);
@@ -203,18 +203,17 @@ export default async function POST(server, Prisma) {
     const id = (request?.body as any)?.id;
 
     try {
-      const outputFileName = (request?.body as any)?.outputFileName;
+      const platform = (request?.body as any)?.platform || PLATFORM.WEB;
       const mimeType = (request?.body as any)?.mimeType;
 
       await Gray({
         inputFileName: fileNameWithExtension(id, mimeType),
-        outputFileName,
+        outputFileName: id,
         mimeType,
       });
 
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
       return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
+        file: platform === PLATFORM.WEB ? await convertToBase64({ id, mimeType }) : await loadFile(fileNameWithExtension(id, mimeType), 'output')
       });
     } catch (e) {
       Sentry.captureException(e);
@@ -228,21 +227,23 @@ export default async function POST(server, Prisma) {
   server.post('/collage', CollageSchema, async (request, reply) => {
     const idOne = (request?.body as any)?.idOne;
     const idTwo = (request?.body as any)?.idTwo;
+    const combinedId = idOne + idTwo;
 
     try {
-      const outputFileName = (request?.body as any)?.outputFileName;
       const mimeType = (request?.body as any)?.mimeType;
+      const platform = (request?.body as any)?.platform || PLATFORM.WEB;
 
       await Collage({
         inputFileNameOne: fileNameWithExtension(idOne, mimeType),
         inputFileNameTwo: fileNameWithExtension(idTwo, mimeType),
-        outputFileName,
+        outputFileName: combinedId,
         mimeType,
       });
 
-      const convertedBase64 = `data:${mimeType};base64, ${base64js.fromByteArray(await loadFile(fileNameWithExtension(outputFileName, mimeType), 'output'))}`;
       return await UpdateUsage(request, Prisma, {
-        file: convertedBase64
+        file: platform === PLATFORM.WEB ? await convertToBase64({
+          id: combinedId, mimeType
+        }) : await loadFile(fileNameWithExtension(combinedId, mimeType), 'output')
       });
     } catch (e) {
       Sentry.captureException(e);

@@ -110,10 +110,9 @@ export const ResizeSchema = {
           maximum: 10_000,
           minimum: 1,
         },
-        outputFileName: {
+        platform: {
           type: 'string',
-          minLength: 8,
-          maxLength: 120
+          enum: ["WEB", "SERVER"]
         },
         mimeType: {
           type: 'string',
@@ -121,7 +120,7 @@ export const ResizeSchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'height', 'width', 'outputFileName', 'mimeType'],
+      required: ['id', 'height', 'width', 'platform', 'mimeType'],
     }
   }
 }
@@ -151,10 +150,9 @@ export const QualitySchema = {
           minimum: 1,
           maximum: 100,
         },
-        outputFileName: {
+        platform: {
           type: 'string',
-          minLength: 8,
-          maxLength: 120
+          enum: ["WEB", "SERVER"]
         },
         mimeType: {
           type: 'string',
@@ -162,7 +160,7 @@ export const QualitySchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'quality', 'outputFileName', 'mimeType'],
+      required: ['id', 'quality', 'platform', 'mimeType'],
     }
   }
 }
@@ -192,10 +190,9 @@ export const MoonlightSchema = {
           minimum: 0,
           maximum: 100,
         },
-        outputFileName: {
+        platform: {
           type: 'string',
-          minLength: 8,
-          maxLength: 120
+          enum: ["WEB", "SERVER"]
         },
         mimeType: {
           type: 'string',
@@ -203,7 +200,7 @@ export const MoonlightSchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'moonValue', 'outputFileName', 'mimeType'],
+      required: ['id', 'moonValue', 'platform', 'mimeType'],
     }
   }
 }
@@ -233,10 +230,9 @@ export const SharpenSchema = {
           minimum: 0,
           maximum: 100,
         },
-        outputFileName: {
+        platform: {
           type: 'string',
-          minLength: 8,
-          maxLength: 120
+          enum: ["WEB", "SERVER"]
         },
         mimeType: {
           type: 'string',
@@ -244,7 +240,7 @@ export const SharpenSchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'sharpenValue', 'outputFileName', 'mimeType'],
+      required: ['id', 'sharpenValue', 'platform', 'mimeType'],
     }
   }
 }
@@ -269,10 +265,9 @@ export const NoExtraParamsSchema = {
           minLength: 36,
           maxLength: 36
         },
-        outputFileName: {
+        platform: {
           type: 'string',
-          minLength: 8,
-          maxLength: 120
+          enum: ["WEB", "SERVER"]
         },
         mimeType: {
           type: 'string',
@@ -280,7 +275,7 @@ export const NoExtraParamsSchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'outputFileName', 'mimeType'],
+      required: ['id', 'platform', 'mimeType'],
     }
   }
 }
@@ -310,10 +305,9 @@ export const CollageSchema = {
           minLength: 36,
           maxLength: 36
         },
-        outputFileName: {
+        platform: {
           type: 'string',
-          minLength: 8,
-          maxLength: 120
+          enum: ["WEB", "SERVER"]
         },
         mimeType: {
           type: 'string',
@@ -321,7 +315,7 @@ export const CollageSchema = {
           maxLength: 12
         }
       },
-      required: ['idOne', 'idTwo', 'outputFileName', 'mimeType'],
+      required: ['idOne', 'idTwo', 'platform', 'mimeType'],
     }
   }
 }
