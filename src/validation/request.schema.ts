@@ -13,45 +13,9 @@ export const SignupSchema = {
           type: 'string',
           format: 'email'
         },
-        contact: {
-          type: 'object',
-          properties: {
-            firstName: {
-              type: 'string',
-              minLength: 2,
-              maxLength: 50
-            },
-            lastName: {
-              type: 'string',
-              minLength: 2,
-              maxLength: 50
-            },
-            address: {
-              type: 'string',
-              minLength: 4,
-              maxLength: 50
-            },
-            city: {
-              type: 'string',
-              minLength: 4,
-              maxLength: 50
-            },
-            state: {
-              type: 'string',
-              minLength: 2,
-              maxLength: 2
-            },
-            zip: {
-              type: 'string',
-              minLength: 5,
-              maxLength: 5
-            }
-          },
-          required: ['firstName', 'lastName', 'address', 'city', 'state', 'zip']
-        },
       },
-      required: ['email', 'contact']
     },
+    required: ['email']
   }
 }
 

@@ -15,9 +15,6 @@ export const onRequest = async (request: any, reply) => {
 
     try {
       const decoded = jwt.decode(accesstoken, process?.env?.JWT_PUBLIC_KEY);
-      const user = await Prisma.getUser({ email: decoded?.user?.email });
-      // Set the user
-      request.headers.user = user;
     } catch (e) {
       reply.code(400).send({
         message: 'Invalid accessToken',

@@ -14,7 +14,7 @@ enum PLATFORM {
 export default async function POST(server, Prisma) {
   server.post('/signup', SignupSchema, async (request, reply) => {
     try {
-      const { email, contact }: any = request?.body;
+      const { email }: any = request?.body;
       const isUser = await Prisma.getUser({ email });
 
       if (isUser?.id) {
@@ -24,12 +24,11 @@ export default async function POST(server, Prisma) {
       }
 
       const apiToken = uuidv4();
-      const user = await Prisma.createUser({ email, token: apiToken, contact });
+      const user = await Prisma.createUser({ email, token: apiToken });
 
       return {
         id: user.id,
         email: user.email,
-        contact: user?.contactInfo,
         usage: user?.usage,
         token: apiToken,
       }
