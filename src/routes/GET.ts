@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/node';
+const jwt = require("node-jsonwebtoken");
 
 export default async function GET(server, Prisma) {
   server.get('/user', async (request, reply) => {
@@ -16,6 +17,24 @@ export default async function GET(server, Prisma) {
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[GET](/user)', 'error');
+      return e;
+    }
+  });
+
+  server.get('/scalorUser', async (request, reply) => {
+    try {
+      const { user }: any = request?.headers;
+
+      return {
+        id: user?.id,
+        email: user?.email,
+        token: user?.token,
+        contact: user?.contactInfo,
+        usage: user?.usage,
+      };
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[GET](/scalorUser)', 'error');
       return e;
     }
   });

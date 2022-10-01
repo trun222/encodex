@@ -2,42 +2,57 @@ import { UsageLimits } from '@/src/util/usage';
 import UserPrisma from '@/src/lib/User.prisma';
 import { logger } from '@/src/util/logging';
 import * as Sentry from '@sentry/node';
+const jwt = require("node-jsonwebtoken");
 
 const env = process?.env?.ENV;
 
 const Prisma = new UserPrisma();
 
 export const onRequest = async (request: any, reply) => {
-  // For every endpoint except /signup require a token
-  if (request.url !== '/signup') {
-    const { token }: any = request?.headers;
+  // Routes that don't require a token
+  if (request.url === '/signup' || request.url === '/scalorUser') {
+    const { accesstoken }: any = request?.headers;
 
-    if (token) {
-      const user = await Prisma.getUser({ token });
-
-      // Check that user token is valid
-      if (token !== user?.token) {
-        reply.code(400).send({
-          message: 'Invalid token',
-        });
-      }
-
-      // Do not check rate limit for /user endpoint
-      if (request.url !== '/user') {
-        // Check that user hasn't exceeded their usage limits
-        if (user?.usage?.apiUsage === UsageLimits[user?.membership!].api) {
-          reply.code(400).send({
-            message: 'Reached API usage limit',
-          });
-        }
-      }
+    try {
+      const decoded = jwt.decode(accesstoken, process?.env?.JWT_PUBLIC_KEY);
+      const user = await Prisma.getUser({ email: decoded?.user?.email });
       // Set the user
       request.headers.user = user;
-    } else {
+    } catch (e) {
       reply.code(400).send({
-        message: 'Missing token',
+        message: 'Invalid accessToken',
       });
     }
+
+    return;
+  }
+
+  const { token }: any = request?.headers;
+  if (token) {
+    const user = await Prisma.getUser({ token });
+
+    // Check that user token is valid
+    if (token !== user?.token) {
+      reply.code(400).send({
+        message: 'Invalid token',
+      });
+    }
+
+    // Do not check rate limit for /user endpoint
+    if (request.url !== '/user') {
+      // Check that user hasn't exceeded their usage limits
+      if (user?.usage?.apiUsage === UsageLimits[user?.membership!].api) {
+        reply.code(400).send({
+          message: 'Reached API usage limit',
+        });
+      }
+    }
+    // Set the user
+    request.headers.user = user;
+  } else {
+    reply.code(400).send({
+      message: 'Missing token',
+    });
   }
   return;
 }
