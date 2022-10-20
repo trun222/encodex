@@ -1,6 +1,6 @@
 import { UsageLimits } from '@/src/util/usage';
 import UserPrisma from '@/src/lib/User.prisma';
-import { logger } from '@/src/util/logging';
+// import { logger } from '@/src/util/logging';
 import * as Sentry from '@sentry/node';
 const jwt = require("node-jsonwebtoken");
 
@@ -74,12 +74,12 @@ export const preValidation = async (request: any, reply) => {
     }
   }
 
-  logger.log({
-    message: `Info - [${request?.url}] (${env})`,
-    action: request?.url,
-    body: (request?.body as any)?.file ? temp : request.body,
-    env,
-  })
+  // logger.log({
+  //   message: `Info - [${request?.url}] (${env})`,
+  //   action: request?.url,
+  //   body: (request?.body as any)?.file ? temp : request.body,
+  //   env,
+  // })
   return;
 }
 
@@ -92,12 +92,12 @@ export const onError = async (request: any, reply) => {
     })
   }
 
-  logger.log({
-    message: `Error - [${request?.url}] (${env})`,
-    action: request?.url,
-    body: (request?.body as any)?.file ? temp : request.body,
-    env,
-  })
+  // logger.log({
+  //   message: `Error - [${request?.url}] (${env})`,
+  //   action: request?.url,
+  //   body: (request?.body as any)?.file ? temp : request.body,
+  //   env,
+  // })
 
   Sentry.captureException(request);
   Sentry.captureMessage('[Hook](onError)', 'error');
