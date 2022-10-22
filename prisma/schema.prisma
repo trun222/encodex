@@ -29,3 +29,11 @@ model User {
   membership String @default("free") @db.VarChar(255)
   usage      Usage?
 }
+
+model StripeSession {
+  id            String @id @unique @db.VarChar(255)
+  email         String @unique @db.VarChar(255)
+  paymentStatus String @default("unpaid") @db.VarChar(255)
+  created       Int
+  expires       Int
+}

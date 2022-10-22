@@ -10,7 +10,7 @@ interface User {
   id: number;
   email: string;
   token: string;
-  membership?: 'free' | 'pro' | 'premium';
+  membership?: MEMBERSHIP;
   usage: {
     id?: number;
     userId?: number;

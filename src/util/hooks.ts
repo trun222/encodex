@@ -1,5 +1,5 @@
 import { UsageLimits } from '@/src/util/usage';
-import UserPrisma from '@/src/lib/User.prisma';
+import UserPrisma from '@/src/db/User.prisma';
 // import { logger } from '@/src/util/logging';
 import * as Sentry from '@sentry/node';
 const jwt = require("node-jsonwebtoken");
@@ -10,7 +10,7 @@ const Prisma = new UserPrisma();
 
 export const onRequest = async (request: any, reply) => {
   // Routes that don't require a token
-  if (request.url === '/signup' || request.url === '/scalorUser') {
+  if (request.url === '/signup' || request.url === '/scalorUser' || request.url === '/stripe/create-checkout-session') {
     const { accesstoken }: any = request?.headers;
 
     try {

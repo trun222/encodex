@@ -1,0 +1,4 @@
+export enum STRIPE_MEMBERSHIP {
+  PREMIUM = "PREMIUM",
+  PRO = "PRO"
+}

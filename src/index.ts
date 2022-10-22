@@ -1,7 +1,7 @@
 import Fastify, { FastifyInstance } from 'fastify'
 import { createFolders } from '@/src/util/files';
 import fileUpload from 'fastify-file-upload';
-import UserPrisma from '@/src/lib/User.prisma';
+import UserPrisma from '@/src/db/User.prisma';
 import { onRequest, preValidation, onError } from '@/src/util/hooks';
 import * as Sentry from '@sentry/node';
 import "@sentry/tracing";
@@ -47,6 +47,9 @@ const Prisma = new UserPrisma();
   server.register(require('@/src/routes/POST'), Prisma);
   // GETS
   server.register(require('@/src/routes/GET'), Prisma);
+  // Stripe
+  server.register(require('@/src/routes/Stripe'));
+
 
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
     console.log(
