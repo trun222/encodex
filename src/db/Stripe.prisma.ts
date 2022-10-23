@@ -39,18 +39,25 @@ export default class StripePrisma {
   }
 
   public async getSession({ email }): Promise<StripeSession | null> {
-    const session = await this.ps.StripeSession.findMany({
-      where: {
-        email,
-      },
-      orderBy: 'expires',
-      take: 1
-    });
+    try {
+      const session = await this.ps.StripeSession.findMany({
+        where: {
+          email,
+        },
+        orderBy: {
+          dateTime: 'desc',
+        },
+        take: 1
+      });
 
-    if (!session) {
+      if (!session) {
+        return null;
+      }
+
+      return session;
+    } catch (e) {
+      console.log(e);
       return null;
     }
-
-    return session;
   }
 }

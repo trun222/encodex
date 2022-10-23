@@ -30,10 +30,11 @@ model User {
   usage      Usage?
 }
 
-model StripeSession {
-  id            String @id @unique @db.VarChar(255)
-  email         String @unique @db.VarChar(255)
-  paymentStatus String @default("unpaid") @db.VarChar(255)
+model StripeCustomerId {
+  id            String   @id @unique @db.VarChar(255)
+  email         String   @db.VarChar(255)
+  paymentStatus String   @default("unpaid") @db.VarChar(255)
   created       Int
   expires       Int
+  dateTime      DateTime @default(now())
 }

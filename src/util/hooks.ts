@@ -10,7 +10,7 @@ const Prisma = new UserPrisma();
 
 export const onRequest = async (request: any, reply) => {
   // Routes that don't require a token
-  if (request.url === '/signup' || request.url === '/scalorUser' || request.url === '/stripe/create-checkout-session') {
+  if (request.url === '/signup' || request.url === '/scalorUser' || request.url === '/stripe/create-checkout-session' || request.url === '/stripe/create-portal-session' || request.url === '/stripe/webhook') {
     const { accesstoken }: any = request?.headers;
 
     try {
