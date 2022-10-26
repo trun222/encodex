@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 const { PrismaClient } = require('@prisma/client');
 
 enum MEMBERSHIP {
@@ -32,58 +33,70 @@ export default class UserPrisma {
     this.ps = new PrismaClient();
   }
 
-  public async createUser(data: any): Promise<User> {
-    const { email, token } = data;
-    const user = await this.ps.User.create({
-      data: {
-        email,
-        token,
-        membership: MEMBERSHIP.FREE
-      },
-    });
-
-    const usage = await this.ps.Usage.create({
-      data: {
-        userId: user?.id,
-        apiUsage: 0,
-        storageUsage: 0,
-        signupDate: new Date(),
-        subscriptionDate: new Date()
-      }
-    })
-
-    return {
-      id: user.id,
-      email: user.email,
-      token: user.token,
-      usage
-    };
-  }
-
-  public async getUser({ email, token }: { email?: string, token?: string }): Promise<User | null> {
-    const user = await this.ps.User.findUnique({
-      where: email ? {
-        email,
-      } : { token },
-    });
-
-    if (user) {
-      const usage = await this.ps.Usage.findUnique({
-        where: {
-          userId: user.id,
+  public async createUser(data: any): Promise<User | null> {
+    try {
+      const { email, token } = data;
+      const user = await this.ps.User.create({
+        data: {
+          email,
+          token,
+          membership: MEMBERSHIP.FREE
         },
       });
+
+      const usage = await this.ps.Usage.create({
+        data: {
+          userId: user?.id,
+          apiUsage: 0,
+          storageUsage: 0,
+          signupDate: new Date(),
+          subscriptionDate: new Date()
+        }
+      })
 
       return {
         id: user.id,
         email: user.email,
         token: user.token,
-        membership: user.membership,
         usage
       };
+    } catch (e) {
+      console.log(e);
+      Sentry.captureException(e);
+      Sentry.captureMessage('[User.prisma.ts](createUser)', 'error');
+      return null;
     }
+  }
 
-    return null;
+  public async getUser({ email, token }: { email?: string, token?: string }): Promise<User | null> {
+    try {
+      const user = await this.ps.User.findUnique({
+        where: email ? {
+          email,
+        } : { token },
+      });
+
+      if (user) {
+        const usage = await this.ps.Usage.findUnique({
+          where: {
+            userId: user.id,
+          },
+        });
+
+        return {
+          id: user.id,
+          email: user.email,
+          token: user.token,
+          membership: user.membership,
+          usage
+        };
+      }
+      return null;
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[User.prisma.ts](getUser)', 'error');
+      return null;
+    }
   }
 
   public async updateUsage(email: string, usage: number, type: UsageType): Promise<any> {
