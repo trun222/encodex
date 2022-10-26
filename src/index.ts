@@ -6,10 +6,10 @@ import { onRequest, preValidation, onError } from '@/src/util/hooks';
 import * as Sentry from '@sentry/node';
 import "@sentry/tracing";
 import cors from '@fastify/cors'
-import rawbody, { RawBodyPluginOptions } from "fastify-raw-body";
+import rawbody from "fastify-raw-body";
 
 Sentry.init({
-  release: 'encodex-graphql@0.0.0',
+  release: 'scalor-services@0.0.1',
   dsn: process.env.SENTRY_DSN,
   tracesSampleRate: 1.0,
   environment: process.env.ENV,
