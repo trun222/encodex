@@ -1,6 +1,8 @@
 import * as Sentry from '@sentry/node';
 import Stripe from 'stripe';
 import StripePrisma from '@/src/db/Stripe.prisma';
+// import SparkPost from 'sparkpost';
+// import { AuthorizationCode } from '@/src/util/authorization';
 
 enum STRIPE_EVENTS {
   CUSTOMER_CREATED = 'customer.created',
@@ -18,6 +20,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2022-08-01',
 });
 
+// const sparkPost = new SparkPost(process.env.SPARK_POST_EMAIL_API_KEY);
+
 const stripePrisma = new StripePrisma();
 
 export default async function StripePayments(server) {
@@ -26,7 +30,7 @@ export default async function StripePayments(server) {
       rawBody: true,
     },
   },
-    (request, response) => {
+    async (request, response) => {
       const sig = request.headers['stripe-signature'];
       let event;
 
@@ -40,8 +44,11 @@ export default async function StripePayments(server) {
         response.status(400).send(`Webhook Error: ${err.message}`);
       }
 
-
-      console.log({ event });
+      // await sparkPost.templates.preview('email-activation', {
+      //   substitution_data: {
+      //     code: AuthorizationCode()
+      //   }
+      // })
 
       // Handle the event
       switch (event.type) {
@@ -79,16 +86,6 @@ export default async function StripePayments(server) {
         cancel_url: `${process.env.DOMAIN}/pricing`,
       });
 
-      // Save Stripe Session ID to DB for a particular user
-      // const { id, paymentStatus, created, expires_at } = session;
-      // const createdSession = await stripePrisma.createSession({
-      //   id,
-      //   email: request.body.email,
-      //   paymentStatus,
-      //   created,
-      //   expires: expires_at
-      // });
-
       return session.url;
     } catch (e) {
       Sentry.captureException(e);
@@ -101,6 +98,8 @@ export default async function StripePayments(server) {
 
   server.post('/stripe/create-portal-session', async (request, reply) => {
     try {
+      // TODO: Note only if the user has ever had a membership
+
       // Lookup user most recent stripe session id
       const fetched: any = await stripePrisma.getSession({
         email: request.body.email,
@@ -113,7 +112,7 @@ export default async function StripePayments(server) {
       const returnUrl = `${process.env.DOMAIN}/dashboard`;
 
       const portalSession = await stripe.billingPortal.sessions.create({
-        customer: 'cus_MfANtaBl2Y2oD1',
+        customer: 'cus_MfCVnmC4DAHprm',
         return_url: returnUrl,
       });
 
