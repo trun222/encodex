@@ -263,15 +263,20 @@ export default async function POST(server, Prisma) {
   server.post('/collage', CollageSchema, async (request, reply) => {
     const idOne = (request?.body as any)?.idOne;
     const idTwo = (request?.body as any)?.idTwo;
+    const urlOne = (request?.body as any)?.urlOne;
+    const urlTwo = (request?.body as any)?.urlTwo;
+    const isURL = !!(urlOne && urlTwo);
     const combinedId = idOne + idTwo;
 
     try {
       const mimeType = (request?.body as any)?.mimeType;
       const platform = (request?.body as any)?.platform || PLATFORM.WEB;
+      const inputFileNameOne = isURL ? urlOne : inputPath(fileNameWithExtension(idOne, mimeType));
+      const inputFileNameTwo = isURL ? urlTwo : inputPath(fileNameWithExtension(idTwo, mimeType));
 
       await Collage({
-        inputFileNameOne: fileNameWithExtension(idOne, mimeType),
-        inputFileNameTwo: fileNameWithExtension(idTwo, mimeType),
+        inputFileNameOne,
+        inputFileNameTwo,
         outputFileName: combinedId,
         mimeType,
       });

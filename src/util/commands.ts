@@ -63,7 +63,7 @@ export const Gray = ({ inputFileName, outputFileName, mimeType }: { inputFileNam
 
 export const Collage = ({ inputFileNameOne, inputFileNameTwo, outputFileName, mimeType }: { inputFileNameOne: string, inputFileNameTwo: string, outputFileName: string, mimeType: string }) => {
   return new Promise((resolve, reject) => {
-    return shell.exec(`montage - label % f - frame 5 - geometry + 4 + 4 ${inputFileNameOne} ${inputFileNameTwo} ${outputPath(fileNameWithExtension(outputFileName, mimeType))} `, function (code, stdout, stderr) {
+    return shell.exec(`montage -label %f -frame 5 -geometry +4+4 ${inputFileNameOne} ${inputFileNameTwo} ${outputPath(fileNameWithExtension(outputFileName, mimeType))} `, function (code, stdout, stderr) {
       if (stderr) {
         reject('Failed to find file with id')
       }

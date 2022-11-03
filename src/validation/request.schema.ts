@@ -279,7 +279,7 @@ export const CollageSchema = {
           maxLength: 12
         }
       },
-      required: ['idOne', 'idTwo', 'platform', 'mimeType'],
+      required: ['platform', 'mimeType'],
     }
   }
 }
