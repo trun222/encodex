@@ -23,18 +23,32 @@ model Usage {
 }
 
 model User {
-  id         Int    @id @default(autoincrement())
-  email      String @unique
-  token      String @unique @db.VarChar(255)
-  membership String @default("free") @db.VarChar(255)
-  usage      Usage?
+  id               Int                @id @default(autoincrement())
+  email            String             @unique
+  token            String             @unique @db.VarChar(255)
+  membership       String             @default("free") @db.VarChar(255)
+  usage            Usage?
+  CloudConnections CloudConnections[]
 }
 
-model StripeCustomerId {
+model StripeCustomer {
   id            String   @id @unique @db.VarChar(255)
   email         String   @db.VarChar(255)
   paymentStatus String   @default("unpaid") @db.VarChar(255)
   created       Int
   expires       Int
   dateTime      DateTime @default(now())
+}
+
+model CloudConnections {
+  id          Int    @id @default(autoincrement())
+  userId      Int
+  provider    String @db.VarChar(255)
+  bucket      String @db.VarChar(255)
+  region      String @db.VarChar(255)
+  accessKeyIV String @db.VarChar(255)
+  accessKey   String @db.VarChar(255)
+  secretKey   String @db.VarChar(255)
+  secretKeyIV String @db.VarChar(255)
+  User        User   @relation(fields: [userId], references: [id])
 }

@@ -5,12 +5,18 @@ import { loadFile, writeFile, fileNameWithExtension } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
 import { convertToBase64 } from '@/src/util/convert';
+import { handleUpload } from '@/src/services/upload.service';
 // import StripePrisma from '@/src/db/Stripe.prisma';
+import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
+
+// TODO: Support both uploadId and fileURL for all actions. Return values should also support file URLs.
 
 enum PLATFORM {
   WEB = 'WEB',
   SERVER = 'SERVER'
 }
+
+const cloudConnectionPrisma: any = new CloudConnectionPrisma();
 
 export default async function POST(server, Prisma) {
   server.post('/signup', SignupSchema, async (request, reply) => {
@@ -42,28 +48,37 @@ export default async function POST(server, Prisma) {
     }
   });
 
-  server.post('/upload', UploadSchema, async (request, reply) => {
+  server.post('/cloudConnection', async (request, reply) => {
     try {
-      const uploadId = uuidv4();
-      const name = (request.body as any)?.file?.name;
-      const data = (request.body as any)?.file?.data;
-      const mimeType = (request.body as any)?.file?.mimetype;
+      const bucket = (request.body as any)?.bucket;
+      const region = (request.body as any)?.region;
+      const provider = (request.body as any)?.provider;
+      const accessKey = (request.body as any)?.accessKey;
+      const secretKey = (request.body as any)?.secretKey;
+      const user = request.headers.user;
 
-      if (name && data) {
-        await writeFile(fileNameWithExtension(uploadId, mimeType), './media', data);
-      }
+      const connection = await cloudConnectionPrisma.createConnection({
+        userId: user.id,
+        provider,
+        bucket,
+        region,
+        accessKey,
+        secretKey,
+      });
 
       return {
-        uploadId,
+        id: connection?.id
       }
     } catch (e) {
       Sentry.captureException(e);
-      Sentry.captureMessage('[POST](/upload)', 'error');
+      Sentry.captureMessage('[POST](/cloudConnection)', 'error');
       return {
-        message: 'Failed to upload file'
+        message: `Failed to create new cloud connection`
       };
     }
-  });
+  })
+
+  server.post('/upload', UploadSchema, async (request, reply) => await handleUpload(request, reply));
 
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
     const id = (request?.body as any)?.id;

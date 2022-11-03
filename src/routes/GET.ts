@@ -1,6 +1,12 @@
 import * as Sentry from '@sentry/node';
 import { v4 as uuidv4 } from 'uuid';
 const jwt = require("node-jsonwebtoken");
+import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
+
+// TODO: Fix inconsistent returning of exceptions throughout the code
+// TODO: Add schema validation
+
+const cloudConnectionPrisma: any = new CloudConnectionPrisma();
 
 export default async function GET(server, Prisma) {
   server.get('/user', async (request, reply) => {
@@ -18,6 +24,31 @@ export default async function GET(server, Prisma) {
       Sentry.captureException(e);
       Sentry.captureMessage('[GET](/user)', 'error');
       return e;
+    }
+  });
+
+  server.get('/cloudConnection/:connectionId', async (request, reply) => {
+    try {
+      const connectionId = (request.params as any)?.connectionId;
+      const user = request.headers.user;
+      const connection = await cloudConnectionPrisma.getConnection({
+        connectionId: parseInt(connectionId, 10)
+      });
+
+      // Ensure someone doesn't try to fetch someone else's cloud connection
+      if (user.id !== connection.userId) {
+        return {
+          message: `This connection is not associated with this user.`
+        };
+      }
+
+      return connection;
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[GET](/cloudConnection)', 'error');
+      return {
+        message: 'Failed to retrieve cloud connection'
+      };
     }
   });
 
