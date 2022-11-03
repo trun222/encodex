@@ -71,4 +71,22 @@ export default class CloudConnectionPrisma {
       return null;
     }
   }
+
+  public async deleteConnection({ connectionId }: { connectionId: number }): Promise<{ id: number } | null> {
+    try {
+      const connection: CloudConnection = await this.ps.CloudConnections.delete({
+        where: {
+          id: connectionId
+        }
+      });
+
+      return {
+        id: connection?.id,
+      };
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[CloudConnection.prisma.ts](deleteConnection)', 'error');
+      return null;
+    }
+  }
 }

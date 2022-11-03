@@ -20,9 +20,10 @@ export async function handleUpload(request: any, reply: any) {
 
 // TODO:
 // 1. Endpoint to add a cloud connection - DONE
-// 2. Endpoint to delete a cloud connection
+// 2. Endpoint to delete a cloud connection - DONE
 // 3. Create prisma scaffolding for cloud connections - DONE
-// 4. Update code to fetch cloud connection instead of hard coding creds
+// 4. Update code to fetch cloud connection instead of hard coding creds - DONE
+// 5. Route validation for all cloud connection routes
 export async function handleCloud(request: any, reply: any) {
   try {
     // File
@@ -44,6 +45,7 @@ export async function handleCloud(request: any, reply: any) {
       };
     }
 
+    // TODO: Add other Cloud Providers.
     const s3 = new S3({
       accessKeyId: connection?.accessKey,
       secretAccessKey: connection?.secretKey,

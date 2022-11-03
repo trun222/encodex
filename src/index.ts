@@ -57,6 +57,8 @@ const Prisma = new UserPrisma();
   server.register(require('@/src/routes/POST'), Prisma);
   // GETS
   server.register(require('@/src/routes/GET'), Prisma);
+  // Deletes
+  server.register(require('@/src/routes/DELETE'));
   // Stripe
   server.register(require('@/src/routes/Stripe'));
 
