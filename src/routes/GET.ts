@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/node';
 import { v4 as uuidv4 } from 'uuid';
 const jwt = require("node-jsonwebtoken");
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
+import { UpdateUsage } from '@/src/util/usage';
 
 // TODO: Fix inconsistent returning of exceptions throughout the code
 // TODO: Add schema validation
@@ -42,7 +43,9 @@ export default async function GET(server, Prisma) {
         };
       }
 
-      return connection;
+      return await UpdateUsage(request, Prisma,
+        connection
+      );
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[GET](/cloudConnection)', 'error');

@@ -69,9 +69,9 @@ export default async function POST(server, Prisma) {
         secretKey,
       });
 
-      return {
+      return await UpdateUsage(request, Prisma, {
         id: connection?.id
-      }
+      });
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/cloudConnection)', 'error');
@@ -81,7 +81,7 @@ export default async function POST(server, Prisma) {
     }
   })
 
-  server.post('/upload', UploadSchema, async (request, reply) => await handleUpload(request, reply));
+  server.post('/upload', UploadSchema, async (request, reply) => await handleUpload(request, reply, Prisma));
 
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
     const id = (request?.body as any)?.id || uuidv4();

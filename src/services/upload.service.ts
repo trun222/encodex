@@ -4,17 +4,18 @@ import * as Sentry from '@sentry/node';
 import { writeFile, fileNameWithExtension } from '@/src/util/files';
 import { v4 as uuidv4 } from 'uuid';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
+import { UpdateUsage } from '@/src/util/usage';
 
 const cloudConnectionPrisma: any = new CloudConnectionPrisma();
 
-export async function handleUpload(request: any, reply: any) {
+export async function handleUpload(request: any, reply: any, prisma: any) {
   const connectionId: Hosted = (request.body as any)?.connectionId;
   const isCloud: boolean = !!connectionId;
 
   if (isCloud) {
-    return await handleCloud(request, reply);
+    return await handleCloud(request, reply, prisma);
   } else {
-    return await handleDefault(request, reply);
+    return await handleDefault(request, reply, prisma);
   }
 }
 
@@ -24,7 +25,7 @@ export async function handleUpload(request: any, reply: any) {
 // 3. Create prisma scaffolding for cloud connections - DONE
 // 4. Update code to fetch cloud connection instead of hard coding creds - DONE
 // 5. Route validation for all cloud connection routes
-export async function handleCloud(request: any, reply: any) {
+export async function handleCloud(request: any, reply: any, prisma: any) {
   try {
     // File
     const data = (request.body as any)?.file?.data;
@@ -60,9 +61,9 @@ export async function handleCloud(request: any, reply: any) {
       contentType: mimeType
     })
 
-    return {
+    return await UpdateUsage(request, prisma, {
       fileURL: uploaded.url
-    }
+    });
   } catch (e) {
     console.log(e);
     Sentry.captureException(e);
@@ -73,7 +74,7 @@ export async function handleCloud(request: any, reply: any) {
   }
 }
 
-export async function handleDefault(request: any, reply: any) {
+export async function handleDefault(request: any, reply: any, prisma: any) {
   try {
     const uploadId = uuidv4();
     const name = (request.body as any)?.file?.name;
@@ -84,9 +85,9 @@ export async function handleDefault(request: any, reply: any) {
       await writeFile(fileNameWithExtension(uploadId, mimeType), './media', data);
     }
 
-    return {
+    return await UpdateUsage(request, prisma, {
       uploadId,
-    }
+    });
   } catch (e) {
     console.log(e);
     Sentry.captureException(e);

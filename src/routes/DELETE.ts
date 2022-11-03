@@ -1,11 +1,12 @@
 import * as Sentry from '@sentry/node';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
+import { UpdateUsage } from '@/src/util/usage';
 
 // TODO: Add schema validation
 
 const cloudConnectionPrisma: any = new CloudConnectionPrisma();
 
-export default async function DELETE(server) {
+export default async function DELETE(server, Prisma) {
   server.delete('/cloudConnection/:connectionId', async (request, reply) => {
     try {
       const connectionId: number = parseInt(request?.params.connectionId, 10);
@@ -24,9 +25,9 @@ export default async function DELETE(server) {
 
       await cloudConnectionPrisma.deleteConnection({ connectionId });
 
-      return {
+      return await UpdateUsage(request, Prisma, {
         id: connection?.id
-      }
+      });
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[DELETE](/deleteConnection)', 'error');
