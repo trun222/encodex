@@ -44,6 +44,72 @@ export const UploadSchema = {
   }
 }
 
+export const GetAndDeleteCloudConnectionSchema = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        'Content-Type': {
+          type: 'string',
+        },
+        token
+      },
+      required: ['token'],
+    },
+    params: {
+      type: 'object',
+      properties: {
+        connectionId: {
+          type: 'number',
+          minimum: 1
+        }
+      },
+      required: ['connectionId'],
+    }
+  }
+}
+
+export const CreateCloudConnectionSchema = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        'Content-Type': {
+          type: 'string',
+        },
+        token
+      },
+      required: ['token'],
+    },
+    body: {
+      type: 'object',
+      properties: {
+        provider: {
+          type: 'string',
+          enum: ['AWS', 'GCP', 'AZURE', 'SCALOR']
+        },
+        bucket: {
+          type: 'string',
+          minLength: 3,
+          maxLength: 255,
+        },
+        region: {
+          type: 'string'
+        },
+        accessKey: {
+          type: 'string'
+        },
+        secretKey: {
+          type: 'string'
+        }
+      },
+      required: ['provider', 'bucket', 'region', 'accessKey', 'secretKey'],
+    }
+  }
+}
+
+
+
 export const ResizeSchema = {
   schema: {
     headers: {

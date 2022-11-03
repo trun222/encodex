@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 const jwt = require("node-jsonwebtoken");
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
 import { UpdateUsage } from '@/src/util/usage';
+import { GetAndDeleteCloudConnectionSchema } from '@/src/validation/request.schema';
 
 // TODO: Fix inconsistent returning of exceptions throughout the code
 // TODO: Add schema validation
@@ -28,7 +29,7 @@ export default async function GET(server, Prisma) {
     }
   });
 
-  server.get('/cloudConnection/:connectionId', async (request, reply) => {
+  server.get('/cloudConnection/:connectionId', GetAndDeleteCloudConnectionSchema, async (request, reply) => {
     try {
       const connectionId = (request.params as any)?.connectionId;
       const user = request.headers.user;

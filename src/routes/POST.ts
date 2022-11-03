@@ -1,4 +1,4 @@
-import { ResizeSchema, QualitySchema, MoonlightSchema, SignupSchema, UploadSchema, SharpenSchema, NoExtraParamsSchema, CollageSchema } from '@/src/validation/request.schema';
+import { ResizeSchema, QualitySchema, MoonlightSchema, SignupSchema, UploadSchema, SharpenSchema, NoExtraParamsSchema, CollageSchema, CreateCloudConnectionSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { Resize, Quality, Moonlight, Sharpen, Average, Collage, Gray } from '@/src/util/commands';
 import { loadFile, writeFile, fileNameWithExtension } from '@/src/util/files';
@@ -9,10 +9,6 @@ import { handleUpload } from '@/src/services/upload.service';
 // import StripePrisma from '@/src/db/Stripe.prisma';
 import { inputPath } from '@/src/util/files';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
-
-// TODO: 
-// 1. Support both uploadId and fileURL for all actions.Return values should also support file URLs.
-// 2. Add usage to everything
 
 enum PLATFORM {
   WEB = 'WEB',
@@ -51,7 +47,7 @@ export default async function POST(server, Prisma) {
     }
   });
 
-  server.post('/cloudConnection', async (request, reply) => {
+  server.post('/cloudConnection', CreateCloudConnectionSchema, async (request, reply) => {
     try {
       const bucket = (request.body as any)?.bucket;
       const region = (request.body as any)?.region;
