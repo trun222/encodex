@@ -7,9 +7,12 @@ import * as Sentry from '@sentry/node';
 import { convertToBase64 } from '@/src/util/convert';
 import { handleUpload } from '@/src/services/upload.service';
 // import StripePrisma from '@/src/db/Stripe.prisma';
+import { inputPath } from '@/src/util/files';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
 
-// TODO: Support both uploadId and fileURL for all actions. Return values should also support file URLs.
+// TODO: 
+// 1. Support both uploadId and fileURL for all actions.Return values should also support file URLs.
+// 2. Add usage to everything
 
 enum PLATFORM {
   WEB = 'WEB',
@@ -81,17 +84,20 @@ export default async function POST(server, Prisma) {
   server.post('/upload', UploadSchema, async (request, reply) => await handleUpload(request, reply));
 
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
-    const id = (request?.body as any)?.id;
+    const id = (request?.body as any)?.id || uuidv4();
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
 
     try {
       const height = (request?.body as any)?.height;
       const width = (request?.body as any)?.width;
       const mimeType = (request?.body as any)?.mimeType;
       const platform = (request?.body as any)?.platform || PLATFORM.WEB;
+      const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
 
       await Resize({
         dimensions: `${width}x${height}`,
-        inputFileName: fileNameWithExtension(id, mimeType),
+        inputFileName,
         outputFileName: id,
         mimeType,
       })
@@ -109,15 +115,18 @@ export default async function POST(server, Prisma) {
   })
 
   server.post('/quality', QualitySchema, async (request, reply) => {
-    const id = (request?.body as any)?.id;
+    const id = (request?.body as any)?.id || uuidv4();
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
 
     try {
       const quality = (request?.body as any)?.quality;
       const mimeType = (request?.body as any)?.mimeType;
       const platform = (request?.body as any)?.platform || PLATFORM.WEB;
+      const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
 
       await Quality({
-        inputFileName: fileNameWithExtension(id, mimeType),
+        inputFileName,
         outputFileName: id,
         quality,
         mimeType,
@@ -136,15 +145,18 @@ export default async function POST(server, Prisma) {
   });
 
   server.post('/moonlight', MoonlightSchema, async (request, reply) => {
-    const id = (request?.body as any)?.id;
+    const id = (request?.body as any)?.id || uuidv4();
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
 
     try {
       const moonValue = (request?.body as any)?.moonValue;
       const mimeType = (request?.body as any)?.mimeType;
       const platform = (request?.body as any)?.platform || PLATFORM.WEB;
+      const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
 
       await Moonlight({
-        inputFileName: fileNameWithExtension(id, mimeType),
+        inputFileName,
         outputFileName: id,
         moonValue,
         mimeType,
@@ -163,15 +175,18 @@ export default async function POST(server, Prisma) {
   });
 
   server.post('/sharpen', SharpenSchema, async (request, reply) => {
-    const id = (request?.body as any)?.id;
+    const id = (request?.body as any)?.id || uuidv4();
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
 
     try {
       const sharpenValue = (request?.body as any)?.sharpenValue;
       const mimeType = (request?.body as any)?.mimeType;
       const platform = (request?.body as any)?.platform || PLATFORM.WEB;
+      const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
 
       await Sharpen({
-        inputFileName: fileNameWithExtension(id, mimeType),
+        inputFileName,
         outputFileName: id,
         sharpenValue,
         mimeType,
@@ -190,14 +205,17 @@ export default async function POST(server, Prisma) {
   });
 
   server.post('/average', NoExtraParamsSchema, async (request, reply) => {
-    const id = (request?.body as any)?.id;
+    const id = (request?.body as any)?.id || uuidv4();
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
 
     try {
       const mimeType = (request?.body as any)?.mimeType;
       const platform = (request?.body as any)?.platform || PLATFORM.WEB;
+      const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
 
       await Average({
-        inputFileName: fileNameWithExtension(id, mimeType),
+        inputFileName,
         outputFileName: id,
         mimeType,
       });
@@ -215,14 +233,17 @@ export default async function POST(server, Prisma) {
   });
 
   server.post('/gray', NoExtraParamsSchema, async (request, reply) => {
-    const id = (request?.body as any)?.id;
+    const id = (request?.body as any)?.id || uuidv4();
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
 
     try {
       const platform = (request?.body as any)?.platform || PLATFORM.WEB;
       const mimeType = (request?.body as any)?.mimeType;
+      const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
 
       await Gray({
-        inputFileName: fileNameWithExtension(id, mimeType),
+        inputFileName,
         outputFileName: id,
         mimeType,
       });

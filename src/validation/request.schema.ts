@@ -84,7 +84,7 @@ export const ResizeSchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'height', 'width', 'platform', 'mimeType'],
+      required: ['height', 'width', 'platform', 'mimeType'],
     }
   }
 }
@@ -124,7 +124,7 @@ export const QualitySchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'quality', 'platform', 'mimeType'],
+      required: ['quality', 'platform', 'mimeType'],
     }
   }
 }
@@ -164,7 +164,7 @@ export const MoonlightSchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'moonValue', 'platform', 'mimeType'],
+      required: ['moonValue', 'platform', 'mimeType'],
     }
   }
 }
@@ -204,7 +204,7 @@ export const SharpenSchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'sharpenValue', 'platform', 'mimeType'],
+      required: ['sharpenValue', 'platform', 'mimeType'],
     }
   }
 }
@@ -239,7 +239,7 @@ export const NoExtraParamsSchema = {
           maxLength: 12
         }
       },
-      required: ['id', 'platform', 'mimeType'],
+      required: ['platform', 'mimeType'],
     }
   }
 }

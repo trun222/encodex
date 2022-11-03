@@ -35,8 +35,8 @@ export const writeFile = async (fileName: string, directory: string, buffer: Buf
   return fsPromise.writeFile(`./${directory}/${fileName}`, buffer, 'utf-8');
 }
 
-export const fileNameWithExtension = (name: string, mimeType: string): string => {
-  return `${name}${MimeToExtension[mimeType]}`;
+export const fileNameWithExtension = (id: string, mimeType: string): string => {
+  return `${id}${MimeToExtension[mimeType]}`;
 }
 
 export const inputPath = (fileName: string): string => {
