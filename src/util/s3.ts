@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import {
   S3Client,
   PutObjectCommand,
@@ -9,8 +8,11 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import md5 from 'md5';
-import { createReadStream, statSync } from 'fs';
+import { statSync } from 'fs';
 import { CHUNK_SIZE } from '@/src/util/files';
+import { File } from '@/src/interfaces/Common.interface';
+
+const LARGE_FILE = 10_000;
 
 export interface Chunk {
   workspaceId: string;
@@ -44,14 +46,41 @@ export class S3 {
     });
   }
 
-  async startMultiPartUpload(fullFileName: string, apiToken: string, chunkCount: number) {
-    try {
-      const keyUrl = `${apiToken}/${randomUUID()}-${fullFileName}`;
+  async handleFileUpload({ file, fileURI, url, isURL, mimeType }: { file: File, fileURI: string, url: string, isURL: boolean, mimeType: string }) {
+    const fileSize = file.size;
+    const isLargeFile = fileSize >= LARGE_FILE;
 
+    if (isLargeFile) {
+      const { Key, UploadId } = await this.client.send(
+        new CreateMultipartUploadCommand({
+          Bucket: this.bucket || process.env.WASABI_BUCKET,
+          Key: fileURI,
+          ACL: 'public-read',
+        })
+      );
+      const uploadedParts = await this.uploadFileChunks(file, {
+        key: Key,
+        assetId: UploadId
+      })
+
+      const completedUpload = await this.completeMultiPartUpload({ Key, UploadId }, uploadedParts);
+
+      return { url: completedUpload?.Location };
+    } else {
+      return await this.uploadFile({
+        file: file.data,
+        fileURI,
+        contentType: mimeType
+      })
+    }
+  }
+
+  async startMultiPartUpload(fileURI: string, chunkCount: number) {
+    try {
       const { UploadId } = await this.client.send(
         new CreateMultipartUploadCommand({
-          Bucket: process.env.WASABI_BUCKET,
-          Key: keyUrl,
+          Bucket: this.bucket || process.env.WASABI_BUCKET,
+          Key: fileURI,
           ACL: 'public-read',
         })
       );
@@ -65,15 +94,15 @@ export class S3 {
             getSignedUrl(
               this.client,
               new UploadPartCommand({
-                Bucket: process.env.WASABI_BUCKET,
-                Key: keyUrl,
+                Bucket: this.bucket || process.env.WASABI_BUCKET,
+                Key: fileURI,
                 UploadId,
                 PartNumber: i + 1,
               })
             )
         )
       );
-      return { signedUrls: signedUrls, assetId: UploadId!, key: keyUrl };
+      return { signedUrls: signedUrls, assetId: UploadId!, key: fileURI };
     } catch (e) {
       console.error(e);
       throw e;
@@ -119,7 +148,7 @@ export class S3 {
     }
   };
 
-  async uploadFile({ file, fileURI, contentType }: { file: Buffer, fileURI: string, apiToken: string, contentType: string }) {
+  async uploadFile({ file, fileURI, contentType }: { file: Buffer, fileURI: string, contentType: string }) {
     try {
       const Command = new PutObjectCommand({
         Bucket: process.env.WASABI_BUCKET!,
@@ -143,8 +172,6 @@ export class S3 {
     startUpload: {
       key: string;
       assetId: string;
-      apiToken: string,
-      fileName: string,
     },
   ): Promise<any> {
     const command = new UploadPartCommand({
@@ -159,11 +186,24 @@ export class S3 {
     return await this.client.send(command);
   }
 
-  async upload_file_chunks(fileName: string, chunks: number, startUpload: { key: string, assetId: string, apiToken: string, fileName: string }) {
+  createChunks(file: File, chunkSize: number) {
+    let startPointer = 0;
+    let endPointer = file.size;
+    let chunks: any = [];
+
+    while (startPointer < endPointer) {
+      let newStartPointer = startPointer + chunkSize;
+      chunks.push(file.data.slice(startPointer, newStartPointer));
+      startPointer = newStartPointer;
+    }
+    return chunks;
+  }
+
+  async uploadFileChunks(file: File, startUpload: { key: string, assetId: string }) {
     const sha1s: any[] = [];
-    const stream = createReadStream(`./media/${fileName}`, { highWaterMark: CHUNK_SIZE });
+    const chunks = this.createChunks(file, CHUNK_SIZE);
     let chunkNumber = 1;
-    for await (let chunk of stream) {
+    for await (let chunk of chunks) {
       // console.log(`${chunkNumber} of ${chunks}`)
       // (Step 3) Get Upload Part URL
       const sha1 = this.calculateMD5(chunk);
@@ -184,6 +224,11 @@ export class S3 {
 
   calculateMD5(chunk: Buffer) {
     return Buffer.from(md5(chunk), 'hex').toString('base64');
+  }
+
+  calculateNumberOfChunksNoFile = (fileSize: number, chunkSize: number) => {
+    const fileSizeInBytes = fileSize;
+    return Math.ceil((fileSizeInBytes / chunkSize));
   }
 
   calculateNumberOfChunks = (fileName: string, chunkSize: number) => {

@@ -1,10 +1,11 @@
-import { Hosted, HostedEnum } from '@/src/interfaces/Cloud.interface';
+import { Hosted } from '@/src/interfaces/Cloud.interface';
 import { S3 } from '@/src/util/s3';
 import * as Sentry from '@sentry/node';
 import { writeFile, fileNameWithExtension } from '@/src/util/files';
 import { v4 as uuidv4 } from 'uuid';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
 import { UpdateUsage } from '@/src/util/usage';
+import { File } from '@/src/interfaces/Common.interface';
 import axios from 'axios';
 
 const cloudConnectionPrisma: any = new CloudConnectionPrisma();
@@ -20,19 +21,16 @@ export async function handleUpload(request: any, reply: any, prisma: any) {
   }
 }
 
-// TODO:
-// 1. Endpoint to add a cloud connection - DONE
-// 2. Endpoint to delete a cloud connection - DONE
-// 3. Create prisma scaffolding for cloud connections - DONE
-// 4. Update code to fetch cloud connection instead of hard coding creds - DONE
-// 5. Route validation for all cloud connection routes
 export async function handleCloud(request: any, reply: any, prisma: any) {
   try {
     // File
-    const data = (request.body as any)?.file?.data;
     const fileURI = (request.body as any)?.fileURI;
     const url = (request?.body as any)?.url;
     const isURL = !!url;
+    const file: File = isURL ? (await axios.get(url, {
+      responseType: 'arraybuffer',
+      decompress: false,
+    })) : (request.body as any)?.file;
     const mimeType = isURL ? (request.body as any)?.mimeType : (request.body as any)?.file?.mimetype;
     // Cloud
     const connectionId = (request.body as any)?.connectionId;
@@ -57,15 +55,12 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
       region: connection?.region
     });
 
-    // TODO: Handle files greater than 10MB
-    const uploaded = await s3.uploadFile({
-      file: isURL ? (await axios.get(url, {
-        responseType: 'arraybuffer',
-        decompress: false,
-      })).data : data,
+    const uploaded = await s3.handleFileUpload({
+      file,
       fileURI,
-      apiToken: request.headers.token,
-      contentType: mimeType
+      url,
+      isURL,
+      mimeType,
     })
 
     return await UpdateUsage(request, prisma, {
