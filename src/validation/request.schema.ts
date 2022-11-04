@@ -38,8 +38,24 @@ export const UploadSchema = {
           contentMediaType: 'multipart/form-data',
           contentEncoding: '7bit',
         },
+        mimeType: {
+          type: 'string',
+          enum: [
+            'image/jpg',
+            'image/jpeg',
+            'image/png',
+            'image/gif'
+          ]
+        },
+        connectionId: {
+          type: 'number',
+          minimum: 1,
+        },
+        fileURI: {
+          type: 'string',
+          minLength: 4
+        }
       },
-      required: ['file'],
     },
   }
 }

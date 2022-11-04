@@ -119,9 +119,8 @@ export class S3 {
     }
   };
 
-  async uploadFile({ file, fileName, apiToken, contentType }: { file: Buffer, fileName: string, apiToken: string, contentType: string }) {
+  async uploadFile({ file, fileURI, contentType }: { file: Buffer, fileURI: string, apiToken: string, contentType: string }) {
     try {
-      const keyUrl = `${apiToken}/${randomUUID()}-${fileName}`;
       const Command = new PutObjectCommand({
         Bucket: process.env.WASABI_BUCKET!,
         Key: keyUrl,

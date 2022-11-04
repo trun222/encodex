@@ -5,6 +5,7 @@ import { writeFile, fileNameWithExtension } from '@/src/util/files';
 import { v4 as uuidv4 } from 'uuid';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
 import { UpdateUsage } from '@/src/util/usage';
+import axios from 'axios';
 
 const cloudConnectionPrisma: any = new CloudConnectionPrisma();
 
@@ -29,8 +30,10 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
   try {
     // File
     const data = (request.body as any)?.file?.data;
-    const mimeType = (request.body as any)?.file?.mimetype;
     const fileURI = (request.body as any)?.fileURI;
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
+    const mimeType = isURL ? (request.body as any)?.mimeType : (request.body as any)?.file?.mimetype;
     // Cloud
     const connectionId = (request.body as any)?.connectionId;
     const user = request.headers.user;
@@ -55,7 +58,10 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
     });
 
     const uploaded = await s3.uploadFile({
-      file: data,
+      file: isURL ? (await axios.get(url, {
+        responseType: 'arraybuffer',
+        decompress: false,
+      })).data : data,
       fileURI,
       apiToken: request.headers.token,
       contentType: mimeType
