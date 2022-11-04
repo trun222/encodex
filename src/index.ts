@@ -65,7 +65,7 @@ const Prisma = new UserPrisma();
 
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
     console.log(
-      `🚀 Encodex ready to convert your media needs on port ${PORT}!`
+      `🚀 Scalor ready to convert your media needs on port ${PORT}!`
     );
   })
 })();

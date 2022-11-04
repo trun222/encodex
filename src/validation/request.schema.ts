@@ -47,6 +47,9 @@ export const UploadSchema = {
             'image/gif'
           ]
         },
+        url: {
+          type: 'string'
+        },
         connectionId: {
           type: 'number',
           minimum: 1,
@@ -146,6 +149,9 @@ export const ResizeSchema = {
           minLength: 36,
           maxLength: 36
         },
+        url: {
+          type: 'string'
+        },
         height: {
           type: 'number',
           maximum: 10_000,
@@ -191,6 +197,9 @@ export const QualitySchema = {
           minLength: 36,
           maxLength: 36
         },
+        url: {
+          type: 'string'
+        },
         quality: {
           type: 'number',
           minimum: 1,
@@ -230,6 +239,9 @@ export const MoonlightSchema = {
           type: 'string',
           minLength: 36,
           maxLength: 36
+        },
+        url: {
+          type: 'string'
         },
         moonValue: {
           type: 'number',
@@ -271,6 +283,9 @@ export const SharpenSchema = {
           minLength: 36,
           maxLength: 36
         },
+        url: {
+          type: 'string'
+        },
         sharpenValue: {
           type: 'number',
           minimum: 0,
@@ -311,6 +326,9 @@ export const NoExtraParamsSchema = {
           minLength: 36,
           maxLength: 36
         },
+        url: {
+          type: 'string'
+        },
         platform: {
           type: 'string',
           enum: ["WEB", "SERVER"]
@@ -346,10 +364,16 @@ export const CollageSchema = {
           minLength: 36,
           maxLength: 36
         },
+        urlOne: {
+          type: 'string'
+        },
         idTwo: {
           type: 'string',
           minLength: 36,
           maxLength: 36
+        },
+        urlTwo: {
+          type: 'string'
         },
         platform: {
           type: 'string',

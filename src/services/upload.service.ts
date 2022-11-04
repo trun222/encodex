@@ -57,6 +57,7 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
       region: connection?.region
     });
 
+    // TODO: Handle files greater than 10MB
     const uploaded = await s3.uploadFile({
       file: isURL ? (await axios.get(url, {
         responseType: 'arraybuffer',
