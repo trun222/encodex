@@ -41,14 +41,17 @@ model StripeCustomer {
 }
 
 model CloudConnections {
-  id          Int    @id @default(autoincrement())
-  userId      Int
-  provider    String @db.VarChar(255)
-  bucket      String @db.VarChar(255)
-  region      String @db.VarChar(255)
-  accessKeyIV String @db.VarChar(255)
-  accessKey   String @db.VarChar(255)
-  secretKey   String @db.VarChar(255)
-  secretKeyIV String @db.VarChar(255)
-  User        User   @relation(fields: [userId], references: [id])
+  id                 Int     @id @default(autoincrement())
+  userId             Int
+  provider           String  @db.VarChar(255)
+  bucket             String? @db.VarChar(255) // AWS
+  region             String? @db.VarChar(255) // AWS
+  accessKeyIV        String? @db.VarChar(255) // AWS
+  accessKey          String? @db.VarChar(255) // AWS
+  secretKey          String? @db.VarChar(255) // AWS
+  secretKeyIV        String? @db.VarChar(255) // AWS
+  accountName        String? @db.VarChar(255) // AZURE
+  accountAccessKeyIV String? @db.VarChar(255) // AZURE
+  accountAccessKey   String? @db.VarChar(255) // AZURE
+  User               User    @relation(fields: [userId], references: [id])
 }

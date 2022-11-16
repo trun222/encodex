@@ -7,6 +7,7 @@ import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
 import { UpdateUsage } from '@/src/util/usage';
 import { File } from '@/src/interfaces/Common.interface';
 import axios from 'axios';
+import { AzureBlob } from '@/src/util/azureBlob';
 
 const cloudConnectionPrisma: any = new CloudConnectionPrisma();
 
@@ -48,20 +49,30 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
     }
 
     // TODO: Add other Cloud Providers.
-    const s3 = new S3({
-      accessKeyId: connection?.accessKey,
-      secretAccessKey: connection?.secretKey,
-      bucket: connection?.bucket,
-      region: connection?.region
-    });
+    // const s3 = new S3({
+    //   accessKeyId: connection?.accessKey,
+    //   secretAccessKey: connection?.secretKey,
+    //   bucket: connection?.bucket,
+    //   region: connection?.region
+    // });
 
-    const uploaded = await s3.handleFileUpload({
+    // const uploaded = await s3.handleFileUpload({
+    //   file,
+    //   fileURI,
+    //   url,
+    //   isURL,
+    //   mimeType,
+    // })
+
+    const azure = new AzureBlob()
+
+    const uploaded = await azure.handleFileUpload({
       file,
       fileURI,
       url,
       isURL,
-      mimeType,
-    })
+      mimeType
+    });
 
     return await UpdateUsage(request, prisma, {
       fileURL: uploaded.url

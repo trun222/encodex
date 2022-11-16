@@ -9,6 +9,7 @@ import { handleUpload } from '@/src/services/upload.service';
 // import StripePrisma from '@/src/db/Stripe.prisma';
 import { inputPath } from '@/src/util/files';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
+import { HostedEnum } from '@/src/interfaces/Cloud.interface';
 
 enum PLATFORM {
   WEB = 'WEB',
@@ -49,21 +50,39 @@ export default async function POST(server, Prisma) {
 
   server.post('/cloudConnection', CreateCloudConnectionSchema, async (request, reply) => {
     try {
-      const bucket = (request.body as any)?.bucket;
-      const region = (request.body as any)?.region;
+      const user = request.headers.user;
+      // ALL
       const provider = (request.body as any)?.provider;
+      // AWS
+      const bucket = (request.body as any)?.bucket;
       const accessKey = (request.body as any)?.accessKey;
       const secretKey = (request.body as any)?.secretKey;
-      const user = request.headers.user;
+      const region = (request.body as any)?.region;
+      // AZURE
+      const accountName = (request.body as any)?.accountName;
+      const accountAccessKey = (request.body as any)?.accountAccessKey;
 
-      const connection = await cloudConnectionPrisma.createConnection({
-        userId: user.id,
-        provider,
-        bucket,
-        region,
-        accessKey,
-        secretKey,
-      });
+      let connection;
+
+      if (provider === HostedEnum.AWS) {
+        // TODO: Ensure all AWS properties are set or send back error
+        connection = await cloudConnectionPrisma.createConnectionAWS({
+          userId: user.id,
+          provider,
+          bucket,
+          region,
+          accessKey,
+          secretKey,
+        });
+      } else if (provider === HostedEnum.AZURE) {
+        // TODO: Ensure all AZURE properties are set or send back error
+        connection = await cloudConnectionPrisma.createConnectionAzure({
+          userId: user.id,
+          provider,
+          accountName,
+          accountAccessKey
+        });
+      }
 
       return await UpdateUsage(request, Prisma, {
         id: connection?.id

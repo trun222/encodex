@@ -120,9 +120,15 @@ export const CreateCloudConnectionSchema = {
         },
         secretKey: {
           type: 'string'
+        },
+        accountName: {
+          type: 'string'
+        },
+        accountAccessKey: {
+          type: 'string'
         }
       },
-      required: ['provider', 'bucket', 'region', 'accessKey', 'secretKey'],
+      required: ['provider'],
     }
   }
 }
