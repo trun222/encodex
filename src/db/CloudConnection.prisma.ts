@@ -16,6 +16,9 @@ interface CloudConnection {
   accountName?: string;
   accountAccessKey?: string;
   accountAccessKeyIV?: string;
+  clientEmail?: string;
+  privateKey?: string;
+  privateKeyIV?: string;
 }
 
 export default class CloudConnectionPrisma {
@@ -73,6 +76,29 @@ export default class CloudConnectionPrisma {
     }
   }
 
+  public async createConnectionGCP({ userId, provider, bucket, clientEmail, privateKey }: CloudConnection): Promise<Omit<CloudConnection, "id"> | null> {
+    try {
+      const encryptedPrivateKey = crypto.encrypt(privateKey!);
+
+      const connection = await this.ps.CloudConnections.create({
+        data: {
+          userId,
+          provider,
+          bucket,
+          clientEmail,
+          privateKey: encryptedPrivateKey.content,
+          privateKeyIV: encryptedPrivateKey.iv
+        },
+      });
+
+      return connection
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[CloudConnection.prisma.ts](createConnectionGCP)', 'error');
+      return null;
+    }
+  }
+
   public async getConnection({ connectionId }: { connectionId: number }): Promise<Omit<CloudConnection, "accessKeyIV" | "secretKeyIV" | "accountAccessKeyIV"> | null> {
     try {
       const connection: CloudConnection = await this.ps.CloudConnections.findUnique({
@@ -99,6 +125,15 @@ export default class CloudConnectionPrisma {
           accountName: connection?.accountName,
           accountAccessKey: crypto.decrypt({ iv: connection?.accountAccessKeyIV!, content: connection?.accountAccessKey! })
         };
+      } else if (connection?.provider === HostedEnum.GCP) {
+        return {
+          id: connection?.id,
+          userId: connection?.userId,
+          provider: connection?.provider,
+          bucket: connection?.bucket,
+          clientEmail: connection?.clientEmail,
+          privateKey: crypto.decrypt({ iv: connection?.privateKeyIV!, content: connection?.privateKey! })
+        }
       }
 
       throw new Error('No connections found');

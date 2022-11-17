@@ -6,7 +6,6 @@ export class AzureBlob {
 
   async handleFileUpload({ file, fileURI, accountName, accountAccessKey }: { file: File, fileURI: string, accountName: string, accountAccessKey: string }) {
     try {
-      console.log({ file });
       const [blobContainer, fileName] = fileURI.split('/');
       const sharedKey = new StorageSharedKeyCredential(accountName, accountAccessKey);
       const client = new BlobServiceClient(

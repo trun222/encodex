@@ -53,5 +53,8 @@ model CloudConnections {
   accountName        String? @db.VarChar(255) // AZURE
   accountAccessKeyIV String? @db.VarChar(255) // AZURE
   accountAccessKey   String? @db.VarChar(255) // AZURE
+  clientEmail        String? @db.VarChar(255) // GCP
+  privateKey         String? @db.Text // GCP
+  privateKeyIV       String? @db.Text // GCP
   User               User    @relation(fields: [userId], references: [id])
 }

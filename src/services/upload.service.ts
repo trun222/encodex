@@ -1,3 +1,4 @@
+import { GCPStorage } from '@/src/util/gcpStorage';
 import { Hosted } from '@/src/interfaces/Cloud.interface';
 import { S3 } from '@/src/util/s3';
 import * as Sentry from '@sentry/node';
@@ -73,6 +74,17 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
         accountName: connection?.accountName,
         accountAccessKey: connection?.accountAccessKey
       });
+    } else if (connection?.provider === HostedEnum.GCP) {
+      const gcp = new GCPStorage();
+
+      uploaded = await gcp.handleFileUpload({
+        file,
+        fileURI,
+        bucket: connection?.bucket,
+        clientEmail: connection?.clientEmail,
+        privateKey: connection?.privateKey
+      })
+
     }
 
     return await UpdateUsage(request, prisma, {

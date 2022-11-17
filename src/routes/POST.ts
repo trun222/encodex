@@ -61,6 +61,9 @@ export default async function POST(server, Prisma) {
       // AZURE
       const accountName = (request.body as any)?.accountName;
       const accountAccessKey = (request.body as any)?.accountAccessKey;
+      // GCP
+      const clientEmail = (request.body as any)?.clientEmail;
+      const privateKey = (request.body as any)?.privateKey;
 
       let connection;
 
@@ -82,6 +85,15 @@ export default async function POST(server, Prisma) {
           accountName,
           accountAccessKey
         });
+      } else if (provider === HostedEnum.GCP) {
+        // TODO: Ensure all GCP properties are set or send back error
+        connection = await cloudConnectionPrisma.createConnectionGCP({
+          userId: user.id,
+          provider,
+          bucket,
+          clientEmail,
+          privateKey
+        })
       }
 
       return await UpdateUsage(request, Prisma, {
