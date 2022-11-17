@@ -46,7 +46,7 @@ export class S3 {
     });
   }
 
-  async handleFileUpload({ file, fileURI, url, isURL, mimeType }: { file: File, fileURI: string, url: string, isURL: boolean, mimeType: string }) {
+  async handleFileUpload({ file, fileURI, mimeType }: { file: File, fileURI: string, mimeType: string }) {
     const fileSize = file.size;
     const isLargeFile = fileSize >= LARGE_FILE;
 

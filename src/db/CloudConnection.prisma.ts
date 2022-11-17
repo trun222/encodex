@@ -15,7 +15,7 @@ interface CloudConnection {
   secretKeyIV?: string;
   accountName?: string;
   accountAccessKey?: string;
-  accountAccessIV?: string;
+  accountAccessKeyIV?: string;
 }
 
 export default class CloudConnectionPrisma {
