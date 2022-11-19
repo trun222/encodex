@@ -10,8 +10,30 @@ import { File } from '@/src/interfaces/Common.interface';
 import axios from 'axios';
 import { AzureBlob } from '@/src/util/azureBlob';
 import { HostedEnum } from '@/src/interfaces/Cloud.interface';
+import { UsageLimits } from '@/src/util/usage';
 
 const cloudConnectionPrisma: any = new CloudConnectionPrisma();
+
+async function handleSetFile({ isURL, url, request }: { isURL: boolean, url: string, request: any }) {
+  const membership = (request?.headers.user as any)?.membership;
+
+  const file = isURL ? (await axios.get(url, {
+    responseType: 'arraybuffer',
+    decompress: false,
+  })) : (request.body as any)?.file;
+
+  if (isURL) {
+    if (file.data.length >= UsageLimits[membership].maxFileSize) {
+      throw new Error('Max File size exceeded.');
+    }
+  } else {
+    if (file.size >= UsageLimits[membership].maxFileSize) {
+      throw new Error('Max File size exceeded.');
+    }
+  }
+
+  return file;
+}
 
 export async function handleUpload(request: any, reply: any, prisma: any) {
   const connectionId: Hosted = (request.body as any)?.connectionId;
@@ -30,10 +52,7 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
     const fileURI = (request.body as any)?.fileURI;
     const url = (request?.body as any)?.url;
     const isURL = !!url;
-    const file: File = isURL ? (await axios.get(url, {
-      responseType: 'arraybuffer',
-      decompress: false,
-    })) : (request.body as any)?.file;
+    const file: File = await handleSetFile({ request, url, isURL });
     const mimeType = isURL ? (request.body as any)?.mimeType : (request.body as any)?.file?.mimetype;
     // Cloud
     const connectionId = (request.body as any)?.connectionId;
@@ -91,12 +110,12 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
       fileURL: uploaded.url
     });
   } catch (e) {
-    console.log(e);
     Sentry.captureException(e);
     Sentry.captureMessage('[upload.service.ts](handleCloud)', 'error');
-    return {
-      message: 'Failed to upload file'
-    };
+    if (e instanceof Error)
+      return {
+        message: e?.message
+      };
   }
 }
 

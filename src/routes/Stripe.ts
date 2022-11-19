@@ -40,8 +40,10 @@ export default async function StripePayments(server) {
         event = stripe.webhooks.constructEvent(request.rawBody, sig, process.env.STRIPE_WEBHOOK_SIGNATURE!);
       }
       catch (err) {
+        let message
+        if (err instanceof Error) message = err.message
         console.log('err: ', err);
-        response.status(400).send(`Webhook Error: ${err.message}`);
+        response.status(400).send(`Webhook Error: ${message}`);
       }
 
       // await sparkPost.templates.preview('email-activation', {

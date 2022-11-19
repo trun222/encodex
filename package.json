@@ -14,7 +14,7 @@
     "format": "prettier --write '**/*.{ts,tsx,yml,yaml}'",
     "lint": "eslint . --ext .ts --max-warnings=0 --fix",
     "db:schema:push": "doppler run -- npx prisma db push",
-    "test": "doppler run -- jest --detectOpenHandles --runInBand --forceExit ./.dist/tests/*.js"
+    "test": "doppler run -- jest --detectOpenHandles --runInBand --forceExit ./src/tests/*.ts"
   },
   "keywords": [],
   "author": "",

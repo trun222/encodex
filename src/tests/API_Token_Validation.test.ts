@@ -1,5 +1,5 @@
 import { app } from '@/src/index';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 let server;
 
@@ -12,8 +12,10 @@ describe('Request Valdidation (Token)', () => {
     try {
       let result = (await axios.get('http://localhost:7777/')).data;
     } catch (e) {
-      expect(e.response.status).toBe(400);
-      expect(e.response.data).toStrictEqual({ message: 'Missing token' });
+      if (e instanceof AxiosError) {
+        expect(e?.response?.status).toBe(400);
+        expect(e?.response?.data).toStrictEqual({ message: 'Missing token' });
+      }
     }
   });
 
@@ -25,8 +27,10 @@ describe('Request Valdidation (Token)', () => {
         }
       })).data;
     } catch (e) {
-      expect(e.response.status).toBe(400);
-      expect(e.response.data).toStrictEqual({ message: 'Invalid token' });
+      if (e instanceof AxiosError) {
+        expect(e?.response?.status).toBe(400);
+        expect(e?.response?.data).toStrictEqual({ message: 'Invalid token' });
+      }
     }
   });
 
@@ -37,19 +41,7 @@ describe('Request Valdidation (Token)', () => {
       }
     });
     expect(result.status).toBe(200);
-    expect(result.data).toStrictEqual({
-      id: 1,
-      email: 'thomasunderwoodii@gmail.com',
-      token: '4a147ec2-71d8-4c1c-8fa6-410d0a4dc5b9',
-      usage: {
-        id: 1,
-        userId: 1,
-        apiUsage: 159,
-        storageUsage: 0,
-        signupDate: '2022-10-26T20:26:34.191Z',
-        subscriptionDate: '2022-10-26T20:26:34.191Z'
-      }
-    });
+    expect(result.data.token).toStrictEqual('4a147ec2-71d8-4c1c-8fa6-410d0a4dc5b9');
   });
 })
 
