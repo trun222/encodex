@@ -15,13 +15,10 @@ Sentry.init({
   environment: process.env.ENV,
 });
 
-const server: FastifyInstance = Fastify({});
 const Prisma = new UserPrisma();
 
-(async function app() {
-  const PORT = 7777;
-  // Create initial folder structure.
-  await createFolders();
+export default function addons() {
+  const server: FastifyInstance = Fastify({});
 
   // File size limits
   server.register(fileUpload, {
@@ -36,11 +33,6 @@ const Prisma = new UserPrisma();
     runFirst: true, // get the body before any preParsing hook change/uncompress it. **Default false**
     routes: [], // array of routes, **`global`** will be ignored, wildcard routes not supported
   });
-
-  // CORS
-  await server.register(cors, {
-    origin: '*'
-  })
 
   // Rate limit based on IP
   server.register(import('@fastify/rate-limit'), {
@@ -62,10 +54,26 @@ const Prisma = new UserPrisma();
   // Stripe
   server.register(require('@/src/routes/Stripe'));
 
+  return server;
+}
+
+(async function app() {
+  const PORT = 7777;
+  // Create initial folder structure.
+  await createFolders();
+
+  const server = addons();
+
+  // CORS
+  await server.register(cors, {
+    origin: '*'
+  })
 
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
     console.log(
       `🚀 Scalor ready to convert your media needs on port ${PORT}!`
     );
   })
+
+  return server;
 })();
