@@ -17,7 +17,7 @@ Sentry.init({
 
 const Prisma = new UserPrisma();
 
-export default function addons() {
+export function addons() {
   const server: FastifyInstance = Fastify({});
 
   // File size limits
@@ -57,7 +57,7 @@ export default function addons() {
   return server;
 }
 
-(async function app() {
+export async function app() {
   const PORT = 7777;
   // Create initial folder structure.
   await createFolders();
@@ -70,10 +70,12 @@ export default function addons() {
   })
 
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
-    console.log(
-      `🚀 Scalor ready to convert your media needs on port ${PORT}!`
-    );
+    // console.log(
+    //   `🚀 Scalor ready to convert your media needs on port ${PORT}!`
+    // );
   })
 
   return server;
-})();
+};
+
+app();

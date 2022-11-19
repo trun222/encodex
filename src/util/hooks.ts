@@ -27,7 +27,6 @@ export const onRequest = async (request: any, reply) => {
   const { token }: any = request?.headers;
   if (token) {
     const user = await Prisma.getUser({ token });
-
     // Check that user token is valid
     if (token !== user?.token) {
       reply.code(400).send({
