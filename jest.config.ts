@@ -11,7 +11,11 @@ const jestConfig: JestConfigWithTsJest = {
     '^@/(.*)$': '<rootDir>/$1',
     '^lib/(.*)$': '<rootDir>/common/$1',
   },
-  testTimeout: 30_000
+  testTimeout: 30_000,
 }
+
+process.env = Object.assign(process.env, {
+  NO_LOGGING: true
+});
 
 export default jestConfig;
