@@ -16,7 +16,7 @@ beforeAll(async () => {
 })
 
 describe('File', () => {
-  test('File size exceeded', async () => {
+  test('File size exceeded for local upload', async () => {
     let result = await axios.post('http://localhost:7777/upload', {
       connectionId: 11,
       fileURI: 'test/wedding.jpg',
@@ -33,27 +33,6 @@ describe('File', () => {
       "message": "Max File size exceeded."
     });
   });
-
-  // test('Reached API usage limit', async () => {
-  //   // Set the user usage at max usage
-  //   await userPrisma.updateUsage('thomasunderwoodii@gmail.com', UsageLimits.free.api, UsageType.API);
-
-  //   try {
-  //     let result = await axios.get('http://localhost:7777/cloudConnection/12', {
-  //       headers: {
-  //         token: '4a147ec2-71d8-4c1c-8fa6-410d0a4dc5b9'
-  //       }
-  //     });
-  //   } catch (e) {
-  //     if (e instanceof AxiosError) {
-  //       expect(e?.response?.status).toBe(400);
-  //       expect(e?.response?.data).toStrictEqual({ message: 'Reached API usage limit' });
-  //     }
-  //   }
-
-  //   // Reset the user usage back to 0
-  //   await userPrisma.updateUsage('thomasunderwoodii@gmail.com', 0, UsageType.API);
-  // });
 })
 
 afterAll(async () => {
