@@ -70,9 +70,9 @@ export async function app() {
   })
 
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
-    // console.log(
-    //   `🚀 Scalor ready to convert your media needs on port ${PORT}!`
-    // );
+    console.log(
+      `🚀 Scalor ready to convert your media needs on port ${PORT}!`
+    );
   })
 
   return server;

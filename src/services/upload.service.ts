@@ -1,3 +1,4 @@
+import { ExtensionToMime } from '@/src/util/mimeTypes';
 import { GCPStorage } from '@/src/util/gcpStorage';
 import { Hosted } from '@/src/interfaces/Cloud.interface';
 import { S3 } from '@/src/util/s3';
@@ -122,12 +123,16 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
 export async function handleDefault(request: any, reply: any, prisma: any) {
   try {
     const uploadId = uuidv4();
-    const name = (request.body as any)?.file?.name;
-    const data = (request.body as any)?.file?.data;
-    const mimeType = (request.body as any)?.file?.mimetype;
+    // For URL
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
+    const splitURL = url && url.split('.');
+    const extension = splitURL && `.${splitURL[splitURL.length - 1]}`;
+    const mimeType = isURL ? ExtensionToMime[extension] : (request.body as any)?.file?.mimetype;
+    const file: File = await handleSetFile({ request, url, isURL });
 
-    if (name && data) {
-      await writeFile(fileNameWithExtension(uploadId, mimeType), './media', data);
+    if (file) {
+      await writeFile(fileNameWithExtension(uploadId, mimeType), './media', file?.data);
     }
 
     return await UpdateUsage(request, prisma, {
