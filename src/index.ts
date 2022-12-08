@@ -34,6 +34,10 @@ export function addons() {
     routes: [], // array of routes, **`global`** will be ignored, wildcard routes not supported
   });
 
+  server.register(cors, {
+    origin: '*'
+  });
+
   // Rate limit based on IP
   server.register(import('@fastify/rate-limit'), {
     max: 100,
@@ -63,11 +67,6 @@ export async function app() {
   await createFolders();
 
   const server = addons();
-
-  // CORS
-  await server.register(cors, {
-    origin: '*'
-  })
 
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
     if (!process.env.NO_LOGGING) {
