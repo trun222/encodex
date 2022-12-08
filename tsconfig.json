@@ -9,7 +9,7 @@
     "target": "es6",
     "module": "commonjs",
     "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
-    "sourceMap": true,
+    "sourceMap": false,
     "outDir": ".dist",
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
@@ -35,6 +35,6 @@
       "transform": "@zerollup/ts-transform-paths"
     }
   ],
-  "exclude": ["node_modules", "td", ".dist"],
+  "exclude": ["node_modules", "td", ".dist", "jest.config.ts"],
   "include": ["**/*.ts", "types.d.ts"]
 }
