@@ -31,9 +31,11 @@ export interface Chunk {
 
 export class S3 {
   private client;
+  private connection;
+  private bucket;
 
-  constructor() {
-    this.client = new S3Client({
+  constructor(connection: any) {
+    this.client = new S3Client(connection ? connection : {
       credentials: {
         accessKeyId: process.env.WASABI_ACCESS_KEY!,
         secretAccessKey: process.env.
@@ -44,6 +46,8 @@ export class S3 {
       endpoint: `https://s3.${process.env.WASABI_REGION}.wasabisys.com`,
       region: process.env.WASABI_REGION!,
     });
+    this.connection = connection;
+    this.bucket = this.connection?.bucket || process.env.WASABI_BUCKET;
   }
 
   async handleFileUpload({ file, fileURI, mimeType }: { file: File, fileURI: string, mimeType: string }) {
@@ -152,13 +156,13 @@ export class S3 {
     try {
       const Command = new PutObjectCommand({
         Bucket: process.env.WASABI_BUCKET!,
-        Key: keyUrl,
+        Key: fileURI,
         Body: file,
         ContentType: contentType,
         ACL: 'public-read',
       });
       await this.client.send(Command);
-      return { url: this.createBucketUrl(keyUrl), key: keyUrl };
+      return { url: this.createBucketUrl(fileURI), key: fileURI };
     } catch (e) {
       console.error(e);
       throw e;
