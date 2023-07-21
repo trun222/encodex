@@ -1,6 +1,6 @@
-import { ResizeSchema, QualitySchema, MoonlightSchema, SignupSchema, UploadSchema, SharpenSchema, NoExtraParamsSchema, CollageSchema, CreateCloudConnectionSchema } from '@/src/validation/request.schema';
+import { ResizeSchema, QualitySchema, MoonlightSchema, SignupSchema, UploadSchema, SharpenSchema, NoExtraParamsSchema, CollageSchema, CreateCloudConnectionSchema, EncodeSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
-import { Resize, Quality, Moonlight, Sharpen, Average, Collage, Gray } from '@/src/util/commands';
+import { Resize, Quality, Moonlight, Sharpen, Average, Collage, Gray, Encode } from '@/src/util/commands';
 import { loadFile, writeFile, fileNameWithExtension } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
@@ -108,6 +108,7 @@ export default async function POST(server, Prisma) {
     }
   })
 
+  // TODO: Handle Large video files
   server.post('/upload', UploadSchema, async (request, reply) => await handleUpload(request, reply, Prisma));
 
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
@@ -322,6 +323,31 @@ export default async function POST(server, Prisma) {
     }
   });
 
+  server.post('/encode', EncodeSchema, async (request: any, reply) => {
+    const id = (request?.body as any)?.id || uuidv4();
+    const url = (request?.body as any)?.url;
+    const isURL = !!url;
+    const format = (request?.body as any)?.format;
+    const mimeType = (request?.body as any)?.mimeType;
+    const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
+
+    try {
+      Encode({
+        inputFileName,
+        outputFileName: id,
+        mimeType,
+        format,
+      });
+
+      return;
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/encode)', 'error');
+      return {
+        message: `Failed to find file with id`
+      };
+    }
+  })
 
   // TODO: Hold off on
   // server.post('/format', FormatSchema, async (request, reply) => {

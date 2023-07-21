@@ -429,3 +429,39 @@ export const FormatSchema = {
     }
   }
 }
+
+
+export const EncodeSchema = {
+  schema: {
+    headers: {
+      type: 'object',
+      properties: {
+        'Content-Type': {
+          type: 'string',
+        },
+        token,
+      },
+      required: ['token'],
+    },
+    body: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
+        format: {
+          type: 'string',
+          enum: ['1080', '720', '540', '360']
+        },
+        mimeType: {
+          type: 'string',
+          minLength: 8,
+          maxLength: 12
+        }
+      },
+      required: ["id", 'format', 'mimeType'],
+    }
+  }
+}
