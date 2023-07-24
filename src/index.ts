@@ -22,7 +22,7 @@ export function addons() {
 
   // File size limits
   server.register(fileUpload, {
-    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB size limit
+    limits: { fileSize: 1500 * 1024 * 1024 }, // 20MB size limit
   });
 
   // Raw Body Requests for Stripe

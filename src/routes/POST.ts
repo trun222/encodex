@@ -339,12 +339,14 @@ export default async function POST(server, Prisma) {
         format,
       });
 
-      return;
+      return {
+        message: `Your file with id ${id} is being encoded.`
+      };
     } catch (e) {
       Sentry.captureException(e);
       Sentry.captureMessage('[POST](/encode)', 'error');
       return {
-        message: `Failed to find file with id`
+        message: `Failed to find file with id ${id}`
       };
     }
   })

@@ -1,4 +1,10 @@
+# Build docker build . -t scalor-services
+
+# Run docker run --env DOPPLER_TOKEN="dp.st.local.6ZIhU7eHIqZ7AXWAlyK4Q4yo4CynJgTTUqydqe1W2J3" --name scalor-services -d -p 7777:7777 scalor-services
+
+
 FROM ubuntu:20.04
+
 WORKDIR /home/app
 
 COPY . /home/app
@@ -16,6 +22,9 @@ RUN node --version
 # install imageMagick
 RUN apt-get install -y imagemagick
 RUN mv policy.xml /etc/ImageMagick-6/
+
+# install `ffmpeg`
+RUN apt-get install -y ffmpeg
 
 # Install Doppler for environment variables
 RUN apt-get update && apt-get install -y apt-transport-https ca-certificates curl gnupg
