@@ -44,7 +44,8 @@ export const UploadSchema = {
             'image/jpg',
             'image/jpeg',
             'image/png',
-            'image/gif'
+            'image/gif',
+            'video/mp4',
           ]
         },
         url: {

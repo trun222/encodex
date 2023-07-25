@@ -74,8 +74,10 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
     let uploaded;
     if (connection?.provider === HostedEnum.AWS) {
       const s3 = new S3({
-        accessKeyId: connection?.accessKey,
-        secretAccessKey: connection?.secretKey,
+        credentials: {
+          accessKeyId: connection?.accessKey,
+          secretAccessKey: connection?.secretKey,
+        },
         bucket: connection?.bucket,
         region: connection?.region
       });

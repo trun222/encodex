@@ -12,7 +12,7 @@ import { statSync } from 'fs';
 import { CHUNK_SIZE } from '@/src/util/files';
 import { File } from '@/src/interfaces/Common.interface';
 
-const LARGE_FILE = 10_000;
+const LARGE_FILE = 10 * 1024 * 1024;
 
 export interface Chunk {
   workspaceId: string;
@@ -33,21 +33,13 @@ export class S3 {
   private client;
   private connection;
   private bucket;
+  private region = 'us-east-1';
 
   constructor(connection: any) {
-    this.client = new S3Client(connection ? connection : {
-      credentials: {
-        accessKeyId: process.env.WASABI_ACCESS_KEY!,
-        secretAccessKey: process.env.
-          WASABI_SECRET!
-        ,
-      },
-      // Ensure endpoint is set for Wasabi
-      endpoint: `https://s3.${process.env.WASABI_REGION}.wasabisys.com`,
-      region: process.env.WASABI_REGION!,
-    });
+    this.client = new S3Client(connection);
     this.connection = connection;
-    this.bucket = this.connection?.bucket || process.env.WASABI_BUCKET;
+    this.bucket = this.connection?.bucket;
+    this.region = this.connection?.region;
   }
 
   async handleFileUpload({ file, fileURI, mimeType }: { file: File, fileURI: string, mimeType: string }) {
@@ -57,11 +49,12 @@ export class S3 {
     if (isLargeFile) {
       const { Key, UploadId } = await this.client.send(
         new CreateMultipartUploadCommand({
-          Bucket: this.bucket || process.env.WASABI_BUCKET,
+          Bucket: this.bucket,
           Key: fileURI,
           ACL: 'public-read',
         })
       );
+
       const uploadedParts = await this.uploadFileChunks(file, {
         key: Key,
         assetId: UploadId
@@ -83,7 +76,7 @@ export class S3 {
     try {
       const { UploadId } = await this.client.send(
         new CreateMultipartUploadCommand({
-          Bucket: this.bucket || process.env.WASABI_BUCKET,
+          Bucket: this.bucket,
           Key: fileURI,
           ACL: 'public-read',
         })
@@ -98,7 +91,7 @@ export class S3 {
             getSignedUrl(
               this.client,
               new UploadPartCommand({
-                Bucket: this.bucket || process.env.WASABI_BUCKET,
+                Bucket: this.bucket,
                 Key: fileURI,
                 UploadId,
                 PartNumber: i + 1,
@@ -122,7 +115,7 @@ export class S3 {
   ): Promise<any> {
     try {
       const command = new CompleteMultipartUploadCommand({
-        Bucket: process.env.WASABI_BUCKET!,
+        Bucket: this.bucket,
         Key: startUpload.Key,
         UploadId: startUpload.UploadId,
         MultipartUpload: {
@@ -142,7 +135,7 @@ export class S3 {
   ): Promise<any> {
     try {
       const command = new AbortMultipartUploadCommand({
-        Bucket: process.env.WASABI_BUCKET!,
+        Bucket: this.bucket,
         Key: key,
         UploadId: uploadId,
       });
@@ -155,7 +148,7 @@ export class S3 {
   async uploadFile({ file, fileURI, contentType }: { file: Buffer, fileURI: string, contentType: string }) {
     try {
       const Command = new PutObjectCommand({
-        Bucket: process.env.WASABI_BUCKET!,
+        Bucket: this.bucket,
         Key: fileURI,
         Body: file,
         ContentType: contentType,
@@ -179,7 +172,7 @@ export class S3 {
     },
   ): Promise<any> {
     const command = new UploadPartCommand({
-      Bucket: process?.env?.WASABI_BUCKET,
+      Bucket: this.bucket,
       Key: startUpload?.key,
       UploadId: startUpload?.assetId,
       PartNumber: chunkNumber,
@@ -223,7 +216,7 @@ export class S3 {
   }
 
   createBucketUrl(key: string) {
-    return `https://s3.${process.env.WASABI_REGION}.wasabisys.com/${process.env.WASABI_BUCKET}/${key}`;
+    return `https://${this.bucket}.s3.amazonaws.com/${key}`;
   };
 
   calculateMD5(chunk: Buffer) {
