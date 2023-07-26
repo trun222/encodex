@@ -1,11 +1,11 @@
 import { ResizeSchema, QualitySchema, MoonlightSchema, SignupSchema, UploadSchema, SharpenSchema, NoExtraParamsSchema, CollageSchema, CreateCloudConnectionSchema, EncodeSchema } from '@/src/validation/request.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { Resize, Quality, Moonlight, Sharpen, Average, Collage, Gray, Encode } from '@/src/util/commands';
-import { loadFile, writeFile, fileNameWithExtension } from '@/src/util/files';
+import { loadFile, fileNameWithExtension, loadFileSync } from '@/src/util/files';
 import { UpdateUsage } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
 import { convertToBase64 } from '@/src/util/convert';
-import { handleUpload } from '@/src/services/upload.service';
+import { handleUpload, handleCloudUpload, checkCloudConnection } from '@/src/services/upload.service';
 // import StripePrisma from '@/src/db/Stripe.prisma';
 import { inputPath } from '@/src/util/files';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
@@ -330,6 +330,13 @@ export default async function POST(server, Prisma) {
     const format = (request?.body as any)?.format;
     const mimeType = (request?.body as any)?.mimeType;
     const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
+    const connectionId = (request.body as any)?.connectionId;
+    const connection = await cloudConnectionPrisma.getConnection({
+      connectionId: parseInt(connectionId, 10)
+    });
+    const fileURI = (request.body as any)?.fileURI;
+    // Ensure the user is the owner of the connection
+    checkCloudConnection(request, connection);
 
     try {
       Encode({
@@ -337,6 +344,10 @@ export default async function POST(server, Prisma) {
         outputFileName: id,
         mimeType,
         format,
+      }).then(async () => {
+        const file: any = loadFileSync(id, mimeType);
+        file.data = file;
+        handleCloudUpload(request, connection, file, fileURI, mimeType);
       });
 
       return {

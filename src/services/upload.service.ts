@@ -15,7 +15,7 @@ import { UsageLimits } from '@/src/util/usage';
 
 const cloudConnectionPrisma: any = new CloudConnectionPrisma();
 
-async function handleSetFile({ isURL, url, request }: { isURL: boolean, url: string, request: any }) {
+export async function handleSetFile({ isURL, url, request }: { isURL: boolean, url: string, request: any }) {
   const membership = (request?.headers.user as any)?.membership;
 
   const file = isURL ? (await axios.get(url, {
@@ -57,57 +57,12 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
     const mimeType = isURL ? (request.body as any)?.mimeType : (request.body as any)?.file?.mimetype;
     // Cloud
     const connectionId = (request.body as any)?.connectionId;
-    const user = request.headers.user;
 
     const connection = await cloudConnectionPrisma.getConnection({
       connectionId: parseInt(connectionId, 10)
     });
 
-    // Ensure someone doesn't try to fetch someone else's cloud connection
-    if (user.id !== connection?.userId) {
-      return {
-        message: `This connection is not associated with this user.`
-      };
-    }
-
-    // TODO: Handle selecting provider type
-    let uploaded;
-    if (connection?.provider === HostedEnum.AWS) {
-      const s3 = new S3({
-        credentials: {
-          accessKeyId: connection?.accessKey,
-          secretAccessKey: connection?.secretKey,
-        },
-        bucket: connection?.bucket,
-        region: connection?.region
-      });
-
-      uploaded = await s3.handleFileUpload({
-        file,
-        fileURI,
-        mimeType,
-      })
-    } else if (connection?.provider === HostedEnum.AZURE) {
-      const azure = new AzureBlob()
-
-      uploaded = await azure.handleFileUpload({
-        file,
-        fileURI,
-        accountName: connection?.accountName,
-        accountAccessKey: connection?.accountAccessKey
-      });
-    } else if (connection?.provider === HostedEnum.GCP) {
-      const gcp = new GCPStorage();
-
-      uploaded = await gcp.handleFileUpload({
-        file,
-        fileURI,
-        bucket: connection?.bucket,
-        clientEmail: connection?.clientEmail,
-        privateKey: connection?.privateKey
-      })
-
-    }
+    const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
 
     return await UpdateUsage(request, prisma, {
       fileURL: uploaded.url
@@ -148,4 +103,64 @@ export async function handleDefault(request: any, reply: any, prisma: any) {
       message: 'Failed to upload file'
     };
   }
+}
+
+export async function handleCloudUpload(request: any, connection: any, file: any, fileURI: string, mimeType: string): Promise<any | { message: string }> {
+  try {
+    // Ensure someone doesn't try to fetch someone else's cloud connection
+    checkCloudConnection(request, connection);
+
+    // TODO: Handle selecting provider type
+    if (connection?.provider === HostedEnum.AWS) {
+      const s3 = new S3({
+        credentials: {
+          accessKeyId: connection?.accessKey,
+          secretAccessKey: connection?.secretKey,
+        },
+        bucket: connection?.bucket,
+        region: connection?.region
+      });
+
+      return await s3.handleFileUpload({
+        file,
+        fileURI,
+        mimeType,
+      })
+    } else if (connection?.provider === HostedEnum.AZURE) {
+      const azure = new AzureBlob()
+
+      return await azure.handleFileUpload({
+        file,
+        fileURI,
+        accountName: connection?.accountName,
+        accountAccessKey: connection?.accountAccessKey
+      });
+    } else if (connection?.provider === HostedEnum.GCP) {
+      const gcp = new GCPStorage();
+
+      return await gcp.handleFileUpload({
+        file,
+        fileURI,
+        bucket: connection?.bucket,
+        clientEmail: connection?.clientEmail,
+        privateKey: connection?.privateKey
+      })
+    }
+  } catch (e) {
+    console.log(e);
+    Sentry.captureException(e);
+    Sentry.captureMessage('[upload.service.ts](handleCloudUpload)', 'error');
+    return {
+      message: 'Failed to upload file to cloud'
+    };
+  }
+}
+
+export function checkCloudConnection(request: any, connection: any) {
+  // Ensure someone doesn't try to fetch someone else's cloud connection
+  const user = request.headers.user;
+  if (user.id !== connection?.userId) {
+    throw Error(`This connection is not associated with this user.`);
+  }
+  return;
 }

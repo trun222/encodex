@@ -15,6 +15,11 @@ export const createFolders = (): void => {
   }
 }
 
+export const loadFileSync = (id: string, mimeType: string): File => {
+  const file: any = fs.readFileSync(`./output/${fileNameWithExtension(id, mimeType)}`);
+  return file;
+}
+
 export const loadFile = async (fileName: string, directory: string): Promise<Buffer> => {
   return fsPromise.readFile(`./${directory}/${fileName}`);
 }
