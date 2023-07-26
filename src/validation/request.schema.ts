@@ -447,10 +447,16 @@ export const EncodeSchema = {
     body: {
       type: 'object',
       properties: {
-        id: {
+        connectionId: {
+          type: 'number',
+        },
+        url: {
+          type: 'string'
+        },
+        fileURI: {
           type: 'string',
-          minLength: 36,
-          maxLength: 36
+          minLength: 8,
+          maxLength: 120
         },
         format: {
           type: 'string',
@@ -462,7 +468,7 @@ export const EncodeSchema = {
           maxLength: 12
         }
       },
-      required: ["id", 'format', 'mimeType'],
+      required: ['connectionId', 'url', 'fileURI', 'format', 'mimeType'],
     }
   }
 }
