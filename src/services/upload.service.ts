@@ -65,7 +65,12 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
     const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
 
     return await UpdateUsage(request, prisma, {
-      fileURL: uploaded.url
+      fileURL: uploaded.url,
+      metadata: {
+        name: file.name,
+        mimeType,
+        size: file.size,
+      }
     });
   } catch (e) {
     Sentry.captureException(e);
@@ -94,6 +99,11 @@ export async function handleDefault(request: any, reply: any, prisma: any) {
 
     return await UpdateUsage(request, prisma, {
       uploadId,
+      metadata: {
+        name: file.name,
+        mimeType,
+        size: file.size,
+      }
     });
   } catch (e) {
     console.log(e);
