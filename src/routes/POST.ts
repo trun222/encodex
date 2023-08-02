@@ -127,6 +127,8 @@ export default async function POST(server, Prisma) {
         connectionId: parseInt(connectionId, 10)
       });
 
+      // Ensure the user is the owner of the connection
+      checkCloudConnection(request, connection);
 
       const s3 = new S3({
         credentials: {
@@ -160,6 +162,9 @@ export default async function POST(server, Prisma) {
       const connection = await cloudConnectionPrisma.getConnection({
         connectionId: parseInt(connectionId, 10)
       });
+
+      // Ensure the user is the owner of the connection
+      checkCloudConnection(request, connection);
 
       const s3 = new S3({
         credentials: {
@@ -199,6 +204,9 @@ export default async function POST(server, Prisma) {
       const connection = await cloudConnectionPrisma.getConnection({
         connectionId: parseInt(connectionId, 10)
       });
+
+      // Ensure the user is the owner of the connection
+      checkCloudConnection(request, connection);
 
       const s3 = new S3({
         credentials: {
@@ -464,7 +472,7 @@ export default async function POST(server, Prisma) {
         const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
         console.log({ uploaded })
         onEncodedComplete(uploaded, webhookURL);
-      });
+      }).catch(e => console.log({ e }));
 
       return {
         message: `Your file with id ${id} is being encoded.`

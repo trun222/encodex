@@ -129,6 +129,10 @@ export const Encode = ({ inputFileName, outputFileName, mimeType, format }: { in
   return new Promise((resolve, reject) => {
     return shell.exec(`ffmpeg -i ${inputFileName} -vf scale=-1:${format} -c:v libx264 -crf 18 -preset veryfast -y -c:a copy ${outputPath(fileNameWithExtension(outputFileName, mimeType))
       }`, function (code, stdout, stderr) {
+        if (stderr) {
+          console.log(stderr);
+        }
+
         if (code) {
           reject('Failed to find file with id')
         }
