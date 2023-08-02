@@ -127,6 +127,8 @@ export default async function POST(server, Prisma) {
         connectionId: parseInt(connectionId, 10)
       });
 
+      console.log({ connection });
+
       const s3 = new S3({
         credentials: {
           accessKeyId: connection?.accessKey,
@@ -135,6 +137,9 @@ export default async function POST(server, Prisma) {
         bucket: connection?.bucket,
         region: connection?.region
       });
+
+      console.log({ s3 })
+
       const startMultiPartUpload = await s3.startMultiPartUpload(fileURI, fileSize);
       return startMultiPartUpload;
     } catch (e) {
