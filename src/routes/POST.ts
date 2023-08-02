@@ -127,7 +127,6 @@ export default async function POST(server, Prisma) {
         connectionId: parseInt(connectionId, 10)
       });
 
-      console.log({ connection });
 
       const s3 = new S3({
         credentials: {
@@ -137,8 +136,6 @@ export default async function POST(server, Prisma) {
         bucket: connection?.bucket,
         region: connection?.region
       });
-
-      console.log({ s3 })
 
       const startMultiPartUpload = await s3.startMultiPartUpload(fileURI, fileSize);
       return startMultiPartUpload;
@@ -460,9 +457,12 @@ export default async function POST(server, Prisma) {
         mimeType,
         format,
       }).then(async () => {
+        console.log('The file was encoded successfully');
         const file: any = loadFileSync(id, mimeType);
+        console.log(file.data.length);
         file.data = file;
         const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
+        console.log({ uploaded })
         onEncodedComplete(uploaded, webhookURL);
       });
 
