@@ -8,6 +8,7 @@ node_modules
 # media
 media
 output
+test
 
 # testing
 coverage

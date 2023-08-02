@@ -11,6 +11,8 @@ import { inputPath } from '@/src/util/files';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
 import { HostedEnum } from '@/src/interfaces/Cloud.interface';
 import { onEncodedComplete } from '@/src/util/hooks';
+import { S3 } from '@/src/util/s3';
+import fs from 'fs';
 
 enum PLATFORM {
   WEB = 'WEB',
@@ -111,6 +113,34 @@ export default async function POST(server, Prisma) {
 
   // TODO: Handle Large video files
   server.post('/upload', UploadSchema, async (request, reply) => await handleUpload(request, reply, Prisma));
+
+  // TODO: Remove
+  server.post('/test-large-upload', async (request, reply) => {
+    const fileURI = request.body.fileURI;
+    const signedURLs = request.body.signedURLs;
+    const assetId = request.body.assetId;
+    const key = request.body.key;
+    const connectionId = request.body.connectionId;
+
+    const connection = await cloudConnectionPrisma.getConnection({
+      connectionId: parseInt(connectionId, 10)
+    });
+
+    const s3 = new S3({
+      credentials: {
+        accessKeyId: connection?.accessKey,
+        secretAccessKey: connection?.secretKey,
+      },
+      bucket: connection?.bucket,
+      region: connection?.region
+    });
+
+    // NOTE: Technically this can be decoupled from Cloud Provider specific upload
+    // Only the completeMultipartUpload needs to be provider specific
+    const uploaded = await s3.uploadChunks(fileURI, signedURLs, key, assetId);
+    return uploaded;
+  });
+
 
   server.post('/resize', ResizeSchema, async (request: any, reply) => {
     const id = (request?.body as any)?.id || uuidv4();

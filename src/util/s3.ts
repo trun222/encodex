@@ -11,6 +11,8 @@ import md5 from 'md5';
 import { statSync } from 'fs';
 import { CHUNK_SIZE } from '@/src/util/files';
 import { File } from '@/src/interfaces/Common.interface';
+import axios from 'axios';
+import fs from 'fs';
 
 const LARGE_FILE = 10 * 1024 * 1024;
 
@@ -42,27 +44,15 @@ export class S3 {
     this.region = this.connection?.region;
   }
 
+  // TODO: Improve Large File Uploads
+  //  Can handle files up to 10MB as of now..
   async handleFileUpload({ file, fileURI, mimeType }: { file: File, fileURI: string, mimeType: string }) {
     const fileSize = file.size;
-    const isLargeFile = fileSize >= LARGE_FILE;
+    const isLargeFile = fileSize > LARGE_FILE;
 
     if (isLargeFile) {
-      const { Key, UploadId } = await this.client.send(
-        new CreateMultipartUploadCommand({
-          Bucket: this.bucket,
-          Key: fileURI,
-          ACL: 'public-read',
-        })
-      );
-
-      const uploadedParts = await this.uploadFileChunks(file, {
-        key: Key,
-        assetId: UploadId
-      })
-
-      const completedUpload = await this.completeMultiPartUpload({ Key, UploadId }, uploadedParts);
-
-      return { url: completedUpload?.Location };
+      const startMultiPartUpload = await this.startMultiPartUpload(fileURI, this.calculateNumberOfChunksNoFile(fileSize, CHUNK_SIZE));
+      return startMultiPartUpload;
     } else {
       return await this.uploadFile({
         file: file.data,
@@ -183,37 +173,73 @@ export class S3 {
     return await this.client.send(command);
   }
 
-  createChunks(file: File, chunkSize: number) {
-    let startPointer = 0;
-    let endPointer = file.size;
-    let chunks: any = [];
-
-    while (startPointer < endPointer) {
-      let newStartPointer = startPointer + chunkSize;
-      chunks.push(file.data.slice(startPointer, newStartPointer));
-      startPointer = newStartPointer;
+  async chunkFile(
+    fileURI: string,
+    chunkSize: number,
+  ): Promise<ArrayBuffer[]> {
+    const file = fs.readFileSync(fileURI);
+    let numberOfChunks: number = Math.ceil(file.length / chunkSize);
+    let chunks: ArrayBuffer[] = [];
+    for (let i = 0; i < numberOfChunks; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, file.length);
+      const chunk = file.slice(start, end);
+      chunks.push(chunk);
     }
     return chunks;
   }
 
-  async uploadFileChunks(file: File, startUpload: { key: string, assetId: string }) {
-    const sha1s: any[] = [];
-    const chunks = this.createChunks(file, CHUNK_SIZE);
-    let chunkNumber = 1;
-    for await (let chunk of chunks) {
-      // console.log(`${chunkNumber} of ${chunks}`)
-      // (Step 3) Get Upload Part URL
-      const sha1 = this.calculateMD5(chunk);
-      // (Step 4) Upload File Part
-      const uploadedChunk = await this.uploadPart(chunk, chunkNumber, sha1, startUpload);
-      sha1s.push({
-        ETag: uploadedChunk.ETag,
-        PartNumber: chunkNumber,
-      });
-      chunkNumber++;
+  async uploadChunks(fileURI: string, urls: string[], key: string, uploadId: string) {
+    try {
+      const chunks = await this.chunkFile(fileURI, CHUNK_SIZE);
+      // we use this to keep track of the upload progress for each chunk
+      const chunksLoaded = Array(chunks.length).fill(0) as number[];
+
+      const parts = await Promise.all(
+        chunks.map(async (chunk, i) => {
+          return axios
+            .put(urls[i], chunk, {
+              onUploadProgress: (progress) => {
+                const { loaded: chunkLoadedSoFar } = progress;
+                chunksLoaded[i] = chunkLoadedSoFar;
+              },
+              headers: key
+                ? {
+                  // Means we're using S3
+                  'Content-Type': 'multipart/form-data',
+                }
+                : {
+                  // otherwise frameIO
+                  // 'Content-Type': file.type,
+                  'x-amz-acl': 'private',
+                },
+            })
+            .then((res) => ({
+              ETag: res.headers['etag'],
+              PartNumber: i + 1,
+            }));
+        })
+      );
+
+      const completed = await this.completeMultiPartUpload(
+        {
+          Key: key,
+          UploadId: uploadId,
+        },
+        parts
+      );
+
+      return {
+        url: completed.Location,
+        key: completed.Key,
+        bucket: completed.Bucket,
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
-    return sha1s;
   }
+
 
   createBucketUrl(key: string) {
     return `https://${this.bucket}.s3.amazonaws.com/${key}`;

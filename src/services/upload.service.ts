@@ -65,7 +65,7 @@ export async function handleCloud(request: any, reply: any, prisma: any) {
     const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
 
     return await UpdateUsage(request, prisma, {
-      fileURL: uploaded.url,
+      ...uploaded,
       metadata: {
         name: file.name,
         mimeType,
