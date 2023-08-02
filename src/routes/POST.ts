@@ -111,34 +111,111 @@ export default async function POST(server, Prisma) {
     }
   })
 
-  // TODO: Handle Large video files
+  // TODO: Add large file abort endpoint
+
+  // TODO: Deny Large File Uploads and force them to use large file upload endpoint
   server.post('/upload', UploadSchema, async (request, reply) => await handleUpload(request, reply, Prisma));
 
-  // TODO: Remove
+  // TODO: Force Users to use this for large file uploads
+  server.post('/start-large-upload', async (request, reply) => {
+    try {
+      const fileURI = request.body.fileURI;
+      const fileSize = request.body.fileSize;
+      const connectionId = request.body.connectionId;
+
+      const connection = await cloudConnectionPrisma.getConnection({
+        connectionId: parseInt(connectionId, 10)
+      });
+
+      const s3 = new S3({
+        credentials: {
+          accessKeyId: connection?.accessKey,
+          secretAccessKey: connection?.secretKey,
+        },
+        bucket: connection?.bucket,
+        region: connection?.region
+      });
+      const startMultiPartUpload = await s3.startMultiPartUpload(fileURI, fileSize);
+      return startMultiPartUpload;
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/start-large-upload)', 'error');
+      console.log(e);
+      return {
+        message: 'Failed to start large file upload'
+      };
+    }
+  });
+
   server.post('/test-large-upload', async (request, reply) => {
-    const fileURI = request.body.fileURI;
-    const signedURLs = request.body.signedURLs;
-    const assetId = request.body.assetId;
-    const key = request.body.key;
-    const connectionId = request.body.connectionId;
+    try {
+      const fileURI = request.body.fileURI;
+      const signedURLs = request.body.signedURLs;
+      const assetId = request.body.assetId;
+      const key = request.body.key;
+      const connectionId = request.body.connectionId;
 
-    const connection = await cloudConnectionPrisma.getConnection({
-      connectionId: parseInt(connectionId, 10)
-    });
+      const connection = await cloudConnectionPrisma.getConnection({
+        connectionId: parseInt(connectionId, 10)
+      });
 
-    const s3 = new S3({
-      credentials: {
-        accessKeyId: connection?.accessKey,
-        secretAccessKey: connection?.secretKey,
-      },
-      bucket: connection?.bucket,
-      region: connection?.region
-    });
+      const s3 = new S3({
+        credentials: {
+          accessKeyId: connection?.accessKey,
+          secretAccessKey: connection?.secretKey,
+        },
+        bucket: connection?.bucket,
+        region: connection?.region
+      });
 
-    // NOTE: Technically this can be decoupled from Cloud Provider specific upload
-    // Only the completeMultipartUpload needs to be provider specific
-    const uploaded = await s3.uploadChunks(fileURI, signedURLs, key, assetId);
-    return uploaded;
+      // NOTE: Technically this can be decoupled from Cloud Provider specific upload
+      // Only the completeMultipartUpload needs to be provider specific
+      const uploaded = await s3.uploadChunks(fileURI, signedURLs, key, assetId);
+      return {
+        parts: uploaded,
+        assetId,
+        key,
+      };
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/test-large-upload)', 'error');
+      return {
+        message: 'Failed to complete large file upload'
+      };
+    }
+  });
+
+
+
+  server.post('/complete-large-upload', async (request, reply) => {
+    try {
+      const parts = request.body.parts;
+      const assetId = request.body.assetId;
+      const key = request.body.key;
+      const connectionId = request.body.connectionId;
+
+      const connection = await cloudConnectionPrisma.getConnection({
+        connectionId: parseInt(connectionId, 10)
+      });
+
+      const s3 = new S3({
+        credentials: {
+          accessKeyId: connection?.accessKey,
+          secretAccessKey: connection?.secretKey,
+        },
+        bucket: connection?.bucket,
+        region: connection?.region
+      });
+
+      const completed = await s3.completeMultiPartUpload({ Key: key, UploadId: assetId }, parts);
+      return completed;
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[POST](/complete-large-upload)', 'error');
+      return {
+        message: 'Failed to complete large file upload'
+      };
+    }
   });
 
 

@@ -51,8 +51,7 @@ export class S3 {
     const isLargeFile = fileSize > LARGE_FILE;
 
     if (isLargeFile) {
-      const startMultiPartUpload = await this.startMultiPartUpload(fileURI, this.calculateNumberOfChunksNoFile(fileSize, CHUNK_SIZE));
-      return startMultiPartUpload;
+      throw new Error('File is too large to upload please use large file endpoints.');
     } else {
       return await this.uploadFile({
         file: file.data,
@@ -62,7 +61,7 @@ export class S3 {
     }
   }
 
-  async startMultiPartUpload(fileURI: string, chunkCount: number) {
+  async startMultiPartUpload(fileURI: string, fileSize: number) {
     try {
       const { UploadId } = await this.client.send(
         new CreateMultipartUploadCommand({
@@ -75,7 +74,7 @@ export class S3 {
       const signedUrls = await Promise.all(
         Array.from(
           {
-            length: chunkCount,
+            length: this.calculateNumberOfChunksNoFile(fileSize, CHUNK_SIZE)
           },
           (_, i) =>
             getSignedUrl(
@@ -112,7 +111,12 @@ export class S3 {
           Parts: partsList,
         },
       });
-      return await this.client.send(command);
+      const completed = await this.client.send(command);
+      return {
+        url: completed.Location,
+        key: completed.Key,
+        bucket: completed.Bucket,
+      };
     } catch (e) {
       console.error(e);
       throw e;
@@ -221,25 +225,12 @@ export class S3 {
         })
       );
 
-      const completed = await this.completeMultiPartUpload(
-        {
-          Key: key,
-          UploadId: uploadId,
-        },
-        parts
-      );
-
-      return {
-        url: completed.Location,
-        key: completed.Key,
-        bucket: completed.Bucket,
-      };
+      return parts;
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
-
 
   createBucketUrl(key: string) {
     return `https://${this.bucket}.s3.amazonaws.com/${key}`;
