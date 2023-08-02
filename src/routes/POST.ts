@@ -467,7 +467,6 @@ export default async function POST(server, Prisma) {
       }).then(async () => {
         console.log('The file was encoded successfully');
         const file: any = loadFileSync(id, mimeType);
-        console.log(file.data.length);
         file.data = file;
         const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
         console.log({ uploaded })
