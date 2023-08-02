@@ -458,6 +458,11 @@ export const EncodeSchema = {
           minLength: 8,
           maxLength: 120
         },
+        webhookURL: {
+          type: 'string',
+          minLength: 8,
+          maxLength: 120
+        },
         format: {
           type: 'string',
           enum: ['1080', '720', '540', '360']
@@ -468,7 +473,7 @@ export const EncodeSchema = {
           maxLength: 12
         }
       },
-      required: ['connectionId', 'url', 'fileURI', 'format', 'mimeType'],
+      required: ['connectionId', 'url', 'fileURI', 'webhookURL', 'format', 'mimeType'],
     }
   }
 }

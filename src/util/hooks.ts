@@ -2,6 +2,8 @@ import { UsageLimits } from '@/src/util/usage';
 import UserPrisma from '@/src/db/User.prisma';
 // import { logger } from '@/src/util/logging';
 import * as Sentry from '@sentry/node';
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
 const jwt = require("node-jsonwebtoken");
 
 const env = process?.env?.ENV;
@@ -102,3 +104,28 @@ export const onError = async (request: any, reply) => {
   Sentry.captureMessage('[Hook](onError)', 'error');
   return;
 }
+
+const Axios = axios.create({
+  // baseURL: process?.env?.FRAME_IO_URL,
+  headers: {
+    // Authorization: `Bearer ${process?.env?.FRAME_IO_DEV_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
+});
+
+axiosRetry(Axios, {
+  retryDelay: axiosRetry.exponentialDelay,
+  retries: 10,
+  retryCondition: (error) => error.response?.status === 429,
+});
+
+// WebHooks
+export const onEncodedComplete = (upload: any, webhookURL: string) => {
+  try {
+    Axios.post(webhookURL, upload);
+  } catch (e) {
+    Axios.post(webhookURL, e);
+    Sentry.captureException(e);
+    Sentry.captureMessage('[Hook](onEncodedComplete)', 'error');
+  }
+};

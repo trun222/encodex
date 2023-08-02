@@ -10,6 +10,7 @@ import { handleUpload, handleCloudUpload, checkCloudConnection } from '@/src/ser
 import { inputPath } from '@/src/util/files';
 import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
 import { HostedEnum } from '@/src/interfaces/Cloud.interface';
+import { onEncodedComplete } from '@/src/util/hooks';
 
 enum PLATFORM {
   WEB = 'WEB',
@@ -121,6 +122,7 @@ export default async function POST(server, Prisma) {
       const width = (request?.body as any)?.width;
       const mimeType = (request?.body as any)?.mimeType;
       const platform = (request?.body as any)?.platform || PLATFORM.WEB;
+      // Why require mimeType? Since the file is already uploaded
       const inputFileName = isURL ? url : inputPath(fileNameWithExtension(id, mimeType));
 
       await Resize({
@@ -335,6 +337,7 @@ export default async function POST(server, Prisma) {
       connectionId: parseInt(connectionId, 10)
     });
     const fileURI = (request.body as any)?.fileURI;
+    const webhookURL = (request.body as any)?.webhookURL;
     // Ensure the user is the owner of the connection
     checkCloudConnection(request, connection);
 
@@ -347,7 +350,8 @@ export default async function POST(server, Prisma) {
       }).then(async () => {
         const file: any = loadFileSync(id, mimeType);
         file.data = file;
-        handleCloudUpload(request, connection, file, fileURI, mimeType);
+        const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
+        onEncodedComplete(uploaded, webhookURL);
       });
 
       return {
