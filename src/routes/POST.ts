@@ -464,14 +464,12 @@ export default async function POST(server, Prisma) {
         outputFileName: id,
         mimeType,
         format,
-      }).then(async () => {
-        console.log('The file was encoded successfully');
+      }).then(async () => await UpdateUsage(request, Prisma, async () => {
         const file: any = loadFileSync(id, mimeType);
         file.data = file;
         const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
-        console.log({ uploaded })
         onEncodedComplete(uploaded, webhookURL);
-      }).catch(e => console.log({ e }));
+      })).catch(e => console.log({ e }));
 
       return {
         message: `Your file with id ${id} is being encoded.`

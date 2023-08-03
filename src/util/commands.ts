@@ -123,8 +123,6 @@ export const Format = ({ inputFileName, outputFileName, mimeType }: { inputFileN
   });
 };
 
-
-// TODO: When finished fire off webhook to notify user that their file is ready or failed
 export const Encode = ({ inputFileName, outputFileName, mimeType, format }: { inputFileName: string, outputFileName: string, mimeType: string, format: VideoFormat }) => {
   return new Promise((resolve, reject) => {
     return shell.exec(`ffmpeg -i ${inputFileName} -vf scale=-1:${format} -c:v libx264 -crf 18 -preset veryfast -y -c:a copy ${outputPath(fileNameWithExtension(outputFileName, mimeType))
