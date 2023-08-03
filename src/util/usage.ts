@@ -11,3 +11,9 @@ export const UpdateUsage = async (request: any, Prisma, fn: any) => {
   await Prisma.updateUsage(user?.email, user?.usage?.apiUsage + 1, UsageType.API);
   return fn;
 }
+
+export const UpdateUsageExec = async (request: any, Prisma, fn: any) => {
+  const user = request?.headers?.user as any;
+  await Prisma.updateUsage(user?.email, user?.usage?.apiUsage + 1, UsageType.API);
+  return await fn();
+}

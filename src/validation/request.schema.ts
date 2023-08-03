@@ -453,6 +453,11 @@ export const EncodeSchema = {
         url: {
           type: 'string'
         },
+        id: {
+          type: 'string',
+          minLength: 36,
+          maxLength: 36
+        },
         fileURI: {
           type: 'string',
           minLength: 8,
@@ -473,7 +478,7 @@ export const EncodeSchema = {
           maxLength: 12
         }
       },
-      required: ['connectionId', 'url', 'fileURI', 'webhookURL', 'format', 'mimeType'],
+      required: ['connectionId', 'fileURI', 'webhookURL', 'format', 'mimeType'],
     }
   }
 }

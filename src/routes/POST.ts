@@ -2,7 +2,7 @@ import { ResizeSchema, QualitySchema, MoonlightSchema, SignupSchema, UploadSchem
 import { v4 as uuidv4 } from 'uuid';
 import { Resize, Quality, Moonlight, Sharpen, Average, Collage, Gray, Encode } from '@/src/util/commands';
 import { loadFile, fileNameWithExtension, loadFileSync } from '@/src/util/files';
-import { UpdateUsage } from '@/src/util/usage';
+import { UpdateUsage, UpdateUsageExec } from '@/src/util/usage';
 import * as Sentry from '@sentry/node';
 import { convertToBase64 } from '@/src/util/convert';
 import { handleUpload, handleCloudUpload, checkCloudConnection } from '@/src/services/upload.service';
@@ -12,7 +12,6 @@ import CloudConnectionPrisma from '@/src/db/CloudConnection.prisma';
 import { HostedEnum } from '@/src/interfaces/Cloud.interface';
 import { onEncodedComplete } from '@/src/util/hooks';
 import { S3 } from '@/src/util/s3';
-import fs from 'fs';
 
 enum PLATFORM {
   WEB = 'WEB',
@@ -464,12 +463,14 @@ export default async function POST(server, Prisma) {
         outputFileName: id,
         mimeType,
         format,
-      }).then(async () => await UpdateUsage(request, Prisma, async () => {
-        const file: any = loadFileSync(id, mimeType);
-        file.data = file;
-        const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
-        onEncodedComplete(uploaded, webhookURL);
-      })).catch(e => console.log({ e }));
+      }).then(async () => {
+        await UpdateUsageExec(request, Prisma, async () => {
+          const file: any = loadFileSync(id, mimeType);
+          file.data = file;
+          const uploaded = await handleCloudUpload(request, connection, file, fileURI, mimeType);
+          onEncodedComplete(uploaded, webhookURL);
+        });
+      }).catch(e => console.log({ e }));
 
       return {
         message: `Your file with id ${id} is being encoded.`
