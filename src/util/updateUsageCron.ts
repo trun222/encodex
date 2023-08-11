@@ -31,7 +31,7 @@ export const UpdateUsageCron = new CronJob(
     } catch (e) {
       console.log({ e });
       Sentry.captureException(e);
-      Sentry.captureMessage('[Hook](onEncodedComplete)', 'error');
+      Sentry.captureMessage('[UpdateUsageCron]', 'error');
     }
   },
   null,
