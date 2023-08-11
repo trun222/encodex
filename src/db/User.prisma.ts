@@ -99,9 +99,24 @@ export default class UserPrisma {
     }
   }
 
-  public async updateUsage(email: string, usage: number, type: UsageType): Promise<any> {
+  public async getAllUsers(): Promise<User[] | null> {
+    try {
+      const users = await this.ps.User.findMany();
+
+      if (users) {
+        return users;
+      }
+      return null;
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[User.prisma.ts](getAllUsers)', 'error');
+      return null;
+    }
+  }
+
+  public async updateUsage({ email, id, usage, type, date }: { email?: string, id?: number, usage: number, type: UsageType, date: Date }): Promise<any> {
     const user = await this.ps.User.findUnique({
-      where: {
+      where: id ? { id } : {
         email,
       },
     });
@@ -113,12 +128,24 @@ export default class UserPrisma {
         },
         data: type === "API" ? {
           apiUsage: usage,
-        } : { storageUsage: usage },
+          lastSyncDate: date
+        } : { storageUsage: usage, lastSyncDate: date },
       });
 
       return updatedUsage;
     }
 
     return null;
+  }
+
+  public async getAllUsages(): Promise<any> {
+    try {
+      const usages = await this.ps.Usage.findMany();
+      return usages;
+    } catch (e) {
+      Sentry.captureException(e);
+      Sentry.captureMessage('[User.prisma.ts](getAllUsages)', 'error');
+      return null;
+    }
   }
 }

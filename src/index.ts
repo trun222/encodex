@@ -7,6 +7,8 @@ import * as Sentry from '@sentry/node';
 import "@sentry/tracing";
 import cors from '@fastify/cors'
 import rawbody from "fastify-raw-body";
+import { UpdateUsageCron } from '@/src/util/updateUsageCron';
+
 
 Sentry.init({
   release: 'scalor-services@0.0.1',
@@ -67,6 +69,10 @@ export async function app() {
   await createFolders();
 
   const server = addons();
+
+  // Cron job
+  const job = UpdateUsageCron;
+  await job.start();
 
   server.listen({ port: PORT, host: '0.0.0.0' }, () => {
     if (!process.env.NO_LOGGING) {

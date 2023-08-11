@@ -24,7 +24,7 @@ describe('User', () => {
 
   test('Reached API usage limit', async () => {
     // Set the user usage at max usage
-    await userPrisma.updateUsage('thomasunderwoodii@gmail.com', UsageLimits.free.api, UsageType.API);
+    await userPrisma.updateUsage({ email: 'thomasunderwoodii@gmail.com', usage: UsageLimits.free.api, type: UsageType.API, date: new Date() });
 
     try {
       let result = await axios.get('http://localhost:7777/cloudConnection/12', {
@@ -40,7 +40,7 @@ describe('User', () => {
     }
 
     // Reset the user usage back to 0
-    await userPrisma.updateUsage('thomasunderwoodii@gmail.com', 0, UsageType.API);
+    await userPrisma.updateUsage({ email: 'thomasunderwoodii@gmail.com', usage: 0, type: UsageType.API, date: new Date() });
   });
 })
 

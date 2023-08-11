@@ -19,6 +19,7 @@ model Usage {
   storageUsage     Float
   signupDate       DateTime
   subscriptionDate DateTime @default(now())
+  lastSyncDate     DateTime @default(now())
   User             User     @relation(fields: [userId], references: [id])
 }
 
