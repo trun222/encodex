@@ -13,7 +13,7 @@ const determineIfSync = (dateTime: Date) => {
 
 export const UpdateUsageCron = new CronJob(
   //s m h d m y
-  '00 00 */00 * * *',
+  '0 0 */0 * * *',
   async () => {
     try {
       const userUsages = await userPrisma.getAllUsages();
