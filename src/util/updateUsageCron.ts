@@ -1,6 +1,7 @@
-import { CronJob } from 'cron';
+import { CronJob, sendAt } from 'cron';
 import UserPrisma, { UsageType } from '@/src/db/User.prisma';
 import * as Sentry from '@sentry/node';
+const CRON_PATTERN = '0 0 * * *';
 const userPrisma = new UserPrisma();
 
 const determineIfSync = (dateTime: Date) => {
@@ -13,7 +14,7 @@ const determineIfSync = (dateTime: Date) => {
 
 export const UpdateUsageCron = new CronJob(
   //s m h d m y
-  '0 0 */0 * * *',
+  CRON_PATTERN,
   async () => {
     try {
       const userUsages = await userPrisma.getAllUsages();
@@ -24,7 +25,8 @@ export const UpdateUsageCron = new CronJob(
           console.log({ updated });
         }
       });
-
+      const dt = sendAt(CRON_PATTERN);
+      console.log(`The job would run at: ${dt.toISO()}`);
       console.log(new Date())
       // Update all users usage
       console.log('You will see this message every midnight');
